@@ -1,2 +1,4 @@
-<p>いんでっくす</p>
-<p><%= @api_key %></p>
+<p>キャンペーン一覧</p>
+<%= link_to "作成", new_campaign_path %>
+<hr>
+<%= render partial: 'campaign', collection: @campaigns %>

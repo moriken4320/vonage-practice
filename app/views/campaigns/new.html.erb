@@ -1,0 +1,6 @@
+<p>キャンペーン作成画面</p>
+<%= form_with model: @campaign, local: true do |form| %>
+    <%= render 'shared/error_messages', model: form.object %>
+    タイトル：<%= form.text_field :title, maxlength: "50" %>
+    <%= form.submit "作成", data: {confirm: "本当に？"} %>
+<% end %>
