@@ -23,31 +23,22 @@ rails:
 mysql:
 	docker-compose exec db bash
 
-.PHONY: redis
-redis:
-	docker-compose exec redis redis-cli
-
 
 .PHONY: migrate
 migrate:
-	docker-compose exec web php artisan migrate
+	docker-compose exec web rails db:migrate
 
 .PHONY: rollback
 rollback:
-	docker-compose exec web php artisan migrate:rollback
+	docker-compose exec web rails db:rollback
 
-.PHONY: fresh
-fresh:
-	docker-compose exec web php artisan migrate:fresh
+.PHONY: reset
+reset:
+	docker-compose exec web rails db:reset
 
-.PHONY: seed
-seed:
-	@make fresh
-	docker-compose exec web php artisan db:seed
-
-.PHONY: tinker
-tinker:
-	docker-compose exec web php artisan tinker
+.PHONY: console
+console:
+	docker-compose exec web rails c
 
 .PHONY: bundle
 bundle:
