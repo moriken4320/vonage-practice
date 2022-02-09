@@ -24,6 +24,14 @@ class CampaignsController < ApplicationController
 
     def show
         @campaign = Campaign::find(params[:id])
+
+        # トークン発行
+        if @campaign.present? && @campaign.session_id.present?
+            @opentok_info = VonageService.generate_access_token(
+                { role: :publisher },
+                @campaign.session_id
+            )
+        end
     end
 
     private

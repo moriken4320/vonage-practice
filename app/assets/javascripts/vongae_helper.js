@@ -15,11 +15,8 @@ const Vonage = function(campaignId, apiKey, sessionId, token, events = {}) {
 	this.selectedVideoDeviceId = null;
 
     // フラグ系
-    this.isSupported = OT.checkSystemRequirements() == 1;
+    this.isSupported = false;
     this.isScreenSupported = false;
-    OT.checkScreenSharingCapability(function(response) {
-        this.isScreenSupported = response.supported && response.extensionRegistered !== false;
-    });
     this.isFirstSubscribed = false;
     this.isConnected = false;
 	this.isPublished = false;
@@ -34,8 +31,8 @@ const Vonage = function(campaignId, apiKey, sessionId, token, events = {}) {
     this.videoOpts = {
         fitMode: "contain",
         insertMode: "append",
-        width: "100%",
-        height: "100%",
+        width: 1280,
+        height: 720,
         style: {
             audioLevelDisplayMode: "off",
             archiveStatusDisplayMode: "on",
@@ -51,12 +48,30 @@ const Vonage = function(campaignId, apiKey, sessionId, token, events = {}) {
     };
 
     /**
+     * publisher用init処理
+     */
+    this.initForPublisher = function() {
+        this.initOT();
+        this.getDevices();
+        this.initSession();
+        this.initPublisher();
+    }
+
+    /**
      * OTの初期設定
      */
-    this.initOTSetting = function() {
+    this.initOT = function() {
         OT.on("exception", function (event) {
             this.errorLog("OT exception", event);
+        }, this);
+
+        this.isSupported = OT.checkSystemRequirements() == 1;
+
+        let isScreenSupported = false;
+        OT.checkScreenSharingCapability(function(response) {
+            isScreenSupported = response.supported && response.extensionRegistered !== false;
         });
+        this.isScreenSupported = isScreenSupported;
     }
 
     /**
@@ -147,19 +162,14 @@ const Vonage = function(campaignId, apiKey, sessionId, token, events = {}) {
      * publisher作成処理
      */
     this.initPublisher = function(){
+        let success = false;
         this.publisherObj = OT.initPublisher(this.videoTagId, this.videoOpts, function(error) {
             if (error) {
                 this.errorLog("initPublisher error:", error);
                 if (this.publisherObj) this.publisherObj.destroy();
                 this.publisherObj = null;
             } else {
-                this.debugLog('initPublisher success:');
-                // this.createRemoteAudioOffIcon();
-
-                this.selectedAudioDeviceId = this.publisherObj.getAudioSource().deviceId;
-                this.selectedVideoDeviceId = this.publisherObj.getVideoSource().deviceId;
-                this.debugLog(null, {selectedAudio: this.selectedAudioDeviceId});
-                this.debugLog(null, {selectedVideo: this.selectedVideoDeviceId});
+                success = true;
             }
         })
         // カメラとマイクへのアクセスを許可したときにディスパッチ
@@ -199,6 +209,16 @@ const Vonage = function(campaignId, apiKey, sessionId, token, events = {}) {
         .on("streamDestroyed", function(event) {
             this.debugLog("initPublisher streamDestroyed:", event);
         }, this);
+
+        if (success) {
+            this.debugLog('initPublisher success:');
+            // this.createRemoteAudioOffIcon();
+
+            this.selectedAudioDeviceId = this.publisherObj.getAudioSource().deviceId;
+            this.selectedVideoDeviceId = this.publisherObj.getVideoSource().deviceId;
+            this.debugLog('selectedAudio:', this.selectedAudioDeviceId);
+            this.debugLog('selectedVideo:', this.selectedVideoDeviceId);
+        }
     }
 
     /**
@@ -241,13 +261,15 @@ const Vonage = function(campaignId, apiKey, sessionId, token, events = {}) {
 
             this.audioDeviceList = devices.filter((device) => device.kind === 'audioInput');
             this.videoDeviceList = devices.filter((device) => device.kind === 'videoInput');
-            this.debugLog(null, {audioList: this.audioDeviceList});
-            this.debugLog(null, {videoList: this.videoDeviceList});
+            this.debugLog('audioList:', this.audioDeviceList);
+            this.debugLog('videoList:', this.videoDeviceList);
 
         });
     }
 
-    // デバイス更新
+    /**
+     * デバイス更新
+     */
     this.deviceUpdated = function() {
         this.getDevices();
         if (!this.audioDeviceList.some((device) => device.deviceId === this.selectedAudioDeviceId)) {

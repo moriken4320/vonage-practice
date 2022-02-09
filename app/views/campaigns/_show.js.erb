@@ -1,9 +1,11 @@
 const vonage = new Vonage(
-    <%= @campaign.id %>,
-    <%= @apiKey %>,
-    <%= @sessionId.session_id %>,
-    <%= @token %>,
+    '<%= @campaign.id %>',
+    '<%= @opentok_info[:api_key] %>',
+    '<%= @campaign.session_id %>',
+    '<%= @opentok_info[:token] %>',
 );
+console.log(vonage);
+vonage.initForPublisher();
 
 // デバイスソース変更時イベント
 navigator.mediaDevices.ondevicechange = async function(event) {
