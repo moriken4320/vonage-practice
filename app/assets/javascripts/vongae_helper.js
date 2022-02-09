@@ -378,7 +378,6 @@ const Vonage = function(campaignId, apiKey, sessionId, token, events = {}) {
         this.sessionObj.unpublish(this.screenPublisherObj);
         this.debugLog("unpublish(screen) success:");
         this.isScreenPublished = false;
-        // this.stopGetStats();
     }
 
     this.debugLog = function(type = "debug", object = null) {
