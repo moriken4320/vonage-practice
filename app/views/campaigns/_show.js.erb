@@ -1,0 +1,11 @@
+const vonage = new Vonage(
+    <%= @campaign.id %>,
+    <%= @apiKey %>,
+    <%= @sessionId.session_id %>,
+    <%= @token %>,
+);
+
+// デバイスソース変更時イベント
+navigator.mediaDevices.ondevicechange = async function(event) {
+    vonage.deviceUpdated();
+}
