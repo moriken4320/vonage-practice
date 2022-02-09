@@ -1,7 +1,10 @@
 FROM ruby:2.5.7
 # ベースにするイメージを指定
 
-RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs default-mysql-client vim
+RUN set -x && curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
+  echo 'deb http://dl.yarnpkg.com/debian/ stable main' > /etc/apt/sources.list.d/yarn.list
+
+RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs default-mysql-client vim yarn
 # RailsのインストールやMySQLへの接続に必要なパッケージをインストール
 
 RUN mkdir /nexpro-vonage-sample

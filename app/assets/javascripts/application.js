@@ -14,3 +14,7 @@
 //= require activestorage
 //= require turbolinks
 //= require_tree .
+//= require jquery
+//= require jquery_ujs
+//= require vue/dist/vue.min
+//= require @opentok/client/dist/js/opentok.min

@@ -1,3 +1,11 @@
+.PHONY: init
+init:
+	docker-compose up -d --build
+	cp .env.example .env
+	@make reset
+	@make migrate
+	@make yarn
+
 .PHONY: up
 up:
 	docker-compose up -d
@@ -36,8 +44,8 @@ rollback:
 reset:
 	docker-compose exec web rails db:reset
 
-.PHONY: console
-console:
+.PHONY: c
+c:
 	docker-compose exec web rails c
 
 .PHONY: bundle

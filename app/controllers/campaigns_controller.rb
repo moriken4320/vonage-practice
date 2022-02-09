@@ -1,4 +1,9 @@
 class CampaignsController < ApplicationController
+    def test
+
+    end
+
+
     def index
         @campaigns = Campaign::all.order(created_at: "DESC")
     end

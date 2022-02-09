@@ -1,5 +1,8 @@
 {
   "name": "nexpro-vonage-sample",
   "private": true,
-  "dependencies": {}
+  "dependencies": {
+    "vue": "^2.6.11",
+    "@opentok/client": "^2.21.1"
+  }
 }
