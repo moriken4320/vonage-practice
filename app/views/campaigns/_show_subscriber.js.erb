@@ -5,7 +5,7 @@ const vonageHelper = new VonageHelper(
     '<%= @opentok_info[:token] %>',
 );
 console.log(vonageHelper);
-vonageHelper.initForPublisher();
+vonageHelper.initForSubscriber();
 
 // デバイスソース変更時イベント
 navigator.mediaDevices.ondevicechange = async function(event) {

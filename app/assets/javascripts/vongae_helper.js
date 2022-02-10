@@ -48,9 +48,29 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
   };
 
   /**
+   * moderator用init処理
+   */
+  this.initForModerator = function () {
+    this.initOT();
+    this.getDevices();
+    this.initSession();
+    this.initPublisher();
+  };
+
+  /**
    * publisher用init処理
    */
   this.initForPublisher = function () {
+    this.initOT();
+    this.getDevices();
+    this.initSession();
+    this.initPublisher();
+  };
+
+  /**
+   * subscriber用init処理
+   */
+  this.initForSubscriber = function () {
     this.initOT();
     this.getDevices();
     this.initSession();
