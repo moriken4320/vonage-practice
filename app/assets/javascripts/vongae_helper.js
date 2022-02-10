@@ -1,4 +1,4 @@
-const Vonage = function (campaignId, apiKey, sessionId, token, events = {}) {
+const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}) {
   this.campaignId = campaignId;
   this.apiKey = apiKey;
   this.sessionId = sessionId;
