@@ -1,90 +1,92 @@
-const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}) {
-  this.campaignId = campaignId;
-  this.apiKey = apiKey;
-  this.sessionId = sessionId;
-  this.token = token;
-  this.events = events;
-  this.videoTagId = "localVideo";
-  this.audioOffImage = null;
-  this.videoOffImage = null;
+class VonageHelper {
+  constructor(campaignId, apiKey, sessionId, token, events = {}) {
+        this.campaignId = campaignId;
+        this.apiKey = apiKey;
+        this.sessionId = sessionId;
+        this.token = token;
+        this.events = events;
+        this.videoTagId = "localVideo";
+        this.audioOffImage = null;
+        this.videoOffImage = null;
 
-  // デバイス系
-  this.audioDeviceList = [];
-  this.videoDeviceList = [];
-  this.selectedAudioDeviceId = null;
-  this.selectedVideoDeviceId = null;
+        // デバイス系
+        this.audioDeviceList = [];
+        this.videoDeviceList = [];
+        this.selectedAudioDeviceId = null;
+        this.selectedVideoDeviceId = null;
 
-  // フラグ系
-  this.isSupported = false;
-  this.isScreenSupported = false;
-  this.isFirstSubscribed = false;
-  this.isConnected = false;
-  this.isPublished = false;
-  this.enableVideo = true;
-  this.enableAudio = true;
-  this.isScreenPublished = false;
-  this.isError = false;
+        // フラグ系
+        this.isSupported = false;
+        this.isScreenSupported = false;
+        this.isFirstSubscribed = false;
+        this.isConnected = false;
+        this.isPublished = false;
+        this.enableVideo = true;
+        this.enableAudio = true;
+        this.isScreenPublished = false;
+        this.isError = false;
 
-  // vonage関連のオブジェクト
-  this.sessionObj = null;
-  this.publisherObj = null;
-  this.videoOpts = {
-    fitMode: "contain",
-    insertMode: "append",
-    width: 1280,
-    height: 720,
-    style: {
-      audioLevelDisplayMode: "off",
-      archiveStatusDisplayMode: "on",
-      backgroundImageURI: this.videoOffImage, // ビデオが表示されていないときの背景画像
-      buttonDisplayMode: "off",
-      nameDisplayMode: "off",
-    },
-  };
-  this.screenPublisherObj = null;
-  this.screenOpts = {
-    videoSource: "screen",
-    videoContentHint: "detail",
-  };
+        // vonage関連のオブジェクト
+        this.sessionObj = null;
+        this.publisherObj = null;
+        this.videoOpts = {
+          fitMode: "contain",
+          insertMode: "append",
+          width: 1280,
+          height: 720,
+          style: {
+            audioLevelDisplayMode: "off",
+            archiveStatusDisplayMode: "on",
+            backgroundImageURI: this.videoOffImage, // ビデオが表示されていないときの背景画像
+            buttonDisplayMode: "off",
+            nameDisplayMode: "off",
+          },
+        };
+        this.screenPublisherObj = null;
+        this.screenOpts = {
+          videoSource: "screen",
+          videoContentHint: "detail",
+        };
+  }
 
   /**
    * moderator用init処理
    */
-  this.initForModerator = function () {
+  async initForModerator() {
     this.initOT();
-    this.getDevices();
-    this.initSession();
+    await this.getDevices();
     this.initPublisher();
-  };
+    this.initSession();
+  }
 
   /**
    * publisher用init処理
    */
-  this.initForPublisher = function () {
+   async initForPublisher() {
     this.initOT();
-    this.getDevices();
-    this.initSession();
+    await this.getDevices();
     this.initPublisher();
+    this.initSession();
   };
 
   /**
    * subscriber用init処理
    */
-  this.initForSubscriber = function () {
+   async initForSubscriber() {
     this.initOT();
-    this.getDevices();
-    this.initSession();
+    await this.getDevices();
     this.initPublisher();
+    this.initSession();
   };
 
   /**
    * OTの初期設定
    */
-  this.initOT = function () {
+  initOT() {
     OT.on(
       "exception",
       function (event) {
-        this.errorLog("OT exception", event);
+        this.#errorLog("OT exception", event);
       },
       this
     );
@@ -102,14 +104,14 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
   /**
    * session接続処理
    */
-  this.initSession = function () {
+  initSession() {
     if (this.isSupported) {
       this.sessionObj = OT.initSession(this.apiKey, this.sessionId)
         // セッションのアーカイブ記録が開始されたときにディスパッチ
         .on(
           "archiveStarted",
           function (event) {
-            this.debugLog("session archiveStarted:", event);
+            this.#debugLog("session archiveStarted:", event);
           },
           this
         )
@@ -117,7 +119,7 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
         .on(
           "archiveStopped",
           function (event) {
-            this.debugLog("session archiveStopped:", event);
+            this.#debugLog("session archiveStopped:", event);
           },
           this
         )
@@ -126,7 +128,7 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
         .on(
           "connectionCreated",
           function (event) {
-            this.debugLog("session connectionCreated:", event);
+            this.#debugLog("session connectionCreated:", event);
           },
           this
         )
@@ -134,7 +136,7 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
         .on(
           "connectionDestroyed",
           function (event) {
-            this.debugLog("session connectionDestroyed:", event);
+            this.#debugLog("session connectionDestroyed:", event);
           },
           this
         )
@@ -142,7 +144,7 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
         .on(
           "muteForced",
           function (event) {
-            this.debugLog("session muteForced:", event);
+            this.#debugLog("session muteForced:", event);
           },
           this
         )
@@ -150,7 +152,7 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
         .on(
           "sessionConnected",
           function (event) {
-            this.debugLog("session sessionConnected:", event);
+            this.#debugLog("session sessionConnected:", event);
           },
           this
         )
@@ -158,9 +160,8 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
         .on(
           "sessionDisconnected",
           function (event) {
-            this.debugLog("session sessionDisconnected:", event);
+            this.#debugLog("session sessionDisconnected:", event);
             this.isConnected = false;
-            this.stopGetStats();
             if (this.publisherObj) {
               this.publisherObj.destroy();
               this.publisherObj = null;
@@ -172,7 +173,7 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
         .on(
           "sessionReconnected",
           function (event) {
-            this.debugLog("session sessionReconnected:", event);
+            this.#debugLog("session sessionReconnected:", event);
           },
           this
         )
@@ -180,7 +181,7 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
         .on(
           "sessionReconnecting",
           function (event) {
-            this.debugLog("session sessionReconnecting:", event);
+            this.#debugLog("session sessionReconnecting:", event);
           },
           this
         )
@@ -188,7 +189,7 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
         .on(
           "signal",
           function (event) {
-            this.debugLog("session signal:", event);
+            this.#debugLog("session signal:", event);
           },
           this
         )
@@ -196,7 +197,7 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
         .on(
           "streamCreated",
           function (event) {
-            this.debugLog("session streamCreated:", event);
+            this.#debugLog("session streamCreated:", event);
           },
           this
         )
@@ -204,7 +205,7 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
         .on(
           "streamDestroyed",
           function (event) {
-            this.debugLog("session streamDestroyed:", event);
+            this.#debugLog("session streamDestroyed:", event);
           },
           this
         )
@@ -214,50 +215,57 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
         .on(
           "streamPropertyChanged",
           function (event) {
-            this.debugLog("session streamPropertyChanged:", event);
+            this.#debugLog("session streamPropertyChanged:", event);
           },
           this
         );
 
-      if (this.sessionObj)
-        this.sessionObj.connect(this.token, function (error) {
-          if (error) this.errorLog("session connect error:", error);
+      if (this.sessionObj) {
+        this.sessionObj.connect(this.token, (error) => {
+          if (error) this.#errorLog("session connect error:", error);
         });
+      }
     } else {
-      this.errorLog("not supported browser.");
+      this.#errorLog("not supported browser.");
     }
   };
 
   /**
    * session切断処理
    */
-  this.sessionDisconnect = function () {
+  sessionDisconnect() {
     if (this.sessionObj) this.sessionObj.disconnect();
   };
 
   /**
    * publisher作成処理
    */
-  this.initPublisher = function () {
-    let success = false;
+  initPublisher() {
+    const options = {
+        audioSource: this.selectedAudioDeviceId,
+        videoSource: this.selectedVideoDeviceId,
+    }
+    $.extend(this.videoOpts, options);
+
     this.publisherObj = OT.initPublisher(
       this.videoTagId,
       this.videoOpts,
-      function (error) {
+      (error) => {
         if (error) {
-          this.errorLog("initPublisher error:", error);
-          if (this.publisherObj) this.publisherObj.destroy();
-          this.publisherObj = null;
-        } else {
-          success = true;
-        }
+            this.#errorLog("initPublisher error:", error);
+            if (this.publisherObj) this.publisherObj.destroy();
+            this.publisherObj = null;
+          } else {
+            this.#debugLog("initPublisher success:");
+            // this.createRemoteAudioOffIcon();
+          }
       }
     )
       // カメラとマイクへのアクセスを許可したときにディスパッチ
       .on(
         "accessAllowed",
         function (event) {
-          this.debugLog("initPublisher accessAllowed:", event);
+          this.#debugLog("initPublisher accessAllowed:", event);
         },
         this
       )
@@ -265,7 +273,7 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
       .on(
         "accessDenied",
         function (event) {
-          this.debugLog("initPublisher accessDenied:", event);
+          this.#debugLog("initPublisher accessDenied:", event);
         },
         this
       )
@@ -273,7 +281,7 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
       .on(
         "accessDialogClosed",
         function (event) {
-          this.debugLog("initPublisher accessDialogClosed:", event);
+          this.#debugLog("initPublisher accessDialogClosed:", event);
         },
         this
       )
@@ -281,7 +289,7 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
       .on(
         "accessDialogOpened",
         function (event) {
-          this.debugLog("initPublisher accessDialogOpened:", event);
+          this.#debugLog("initPublisher accessDialogOpened:", event);
         },
         this
       )
@@ -298,7 +306,7 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
       .on(
         "destroyed",
         function (event) {
-          this.debugLog("initPublisher destroyed:", event);
+          this.#debugLog("initPublisher destroyed:", event);
         },
         this
       )
@@ -306,7 +314,7 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
       .on(
         "muteForced",
         function (event) {
-          this.debugLog("initPublisher muteForced:", event);
+          this.#debugLog("initPublisher muteForced:", event);
         },
         this
       )
@@ -314,7 +322,7 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
       .on(
         "streamCreated",
         function (event) {
-          this.debugLog("initPublisher streamCreated:", event);
+          this.#debugLog("initPublisher streamCreated:", event);
         },
         this
       )
@@ -322,46 +330,38 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
       .on(
         "streamDestroyed",
         function (event) {
-          this.debugLog("initPublisher streamDestroyed:", event);
+          event.preventDefault();
+          this.#debugLog("initPublisher streamDestroyed:", event);
         },
         this
       );
-
-    if (success) {
-      this.debugLog("initPublisher success:");
-      // this.createRemoteAudioOffIcon();
-
-      this.selectedAudioDeviceId = this.publisherObj.getAudioSource().deviceId;
-      this.selectedVideoDeviceId = this.publisherObj.getVideoSource().deviceId;
-      this.debugLog("selectedAudio:", this.selectedAudioDeviceId);
-      this.debugLog("selectedVideo:", this.selectedVideoDeviceId);
-    }
   };
 
   /**
    * 配信開始
    */
-  this.publish = function () {
+  publish() {
     if (this.isPublished) return;
-    if (this.sessionObj && this.publisherObj)
-      this.sessionObj.publish(this.publisherObj, function (error) {
+    if (this.sessionObj && this.publisherObj) {
+      this.sessionObj.publish(this.publisherObj, (error) => {
         if (error) {
-          this.errorLog("publish error:", error);
-        } else {
-          this.debugLog("publish success:");
-          this.isPublished = true;
-        }
+            this.#errorLog("publish error:", error);
+          } else {
+            this.#debugLog("publish success:");
+            this.isPublished = true;
+          }
       });
+    }
   };
 
   /**
    * 配信停止
    */
-  this.unPublish = function () {
+  unPublish() {
     if (!this.isPublished) return;
     if (this.sessionObj && this.publisherObj) {
       this.sessionObj.unpublish(this.publisherObj);
-      this.debugLog("unpublish success:");
+      this.#debugLog("unpublish success:");
       this.isPublished = false;
     }
   };
@@ -369,28 +369,37 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
   /**
    * マイク、カメラデバイスの取得
    */
-  this.getDevices = function () {
-    OT.getDevices((error, devices) => {
-      if (error) {
-        this.errorLog("getDevices error:", error);
-        return;
-      }
+  async getDevices() {
+    return new Promise((resolve) => {
+        OT.getDevices((error, devices) => {
+            if (error) {
+              this.#errorLog("getDevices error:", error);
+              return;
+            }
 
-      this.audioDeviceList = devices.filter(
-        (device) => device.kind === "audioInput"
-      );
-      this.videoDeviceList = devices.filter(
-        (device) => device.kind === "videoInput"
-      );
-      this.debugLog("audioList:", this.audioDeviceList);
-      this.debugLog("videoList:", this.videoDeviceList);
+            this.audioDeviceList = devices.filter(
+              (device) => device.kind === "audioInput"
+            );
+            this.videoDeviceList = devices.filter(
+              (device) => device.kind === "videoInput"
+            );
+            this.#debugLog("audioList:", this.audioDeviceList);
+            this.#debugLog("videoList:", this.videoDeviceList);
+
+            this.selectedAudioDeviceId = this.audioDeviceList[0].deviceId;
+            this.selectedVideoDeviceId = this.videoDeviceList[0].deviceId;
+            this.#debugLog("selectedAudioDeviceId:", this.selectedAudioDeviceId);
+            this.#debugLog("selectedVideoDeviceId:", this.selectedVideoDeviceId);
+
+            resolve();
+          });
     });
   };
 
   /**
    * デバイス更新
    */
-  this.deviceUpdated = function () {
+  deviceUpdated() {
     this.getDevices();
     if (
       !this.audioDeviceList.some(
@@ -411,31 +420,31 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
   /**
    * マイクソースの変更
    */
-  this.setAudioSource = function (audioDeviceId) {
+  setAudioSource(audioDeviceId) {
     if (!this.publisherObj) return;
     this.selectedAudioDeviceId = audioDeviceId;
     this.publisherObj.setAudioSource(this.selectedAudioDeviceId);
-    this.debugLog("setAudioSource:", this.selectedAudioDeviceId);
+    this.#debugLog("setAudioSource:", this.selectedAudioDeviceId);
   };
 
   /**
    * カメラソースの変更
    */
-  this.setVideoSource = function (videoDeviceId) {
+  setVideoSource(videoDeviceId) {
     if (!this.publisherObj) return;
     this.selectedVideoDeviceId = videoDeviceId;
     this.publisherObj.setVideoSource(this.selectedVideoDeviceId);
-    this.debugLog("setVideoSource:", this.selectedVideoDeviceId);
+    this.#debugLog("setVideoSource:", this.selectedVideoDeviceId);
   };
 
   /**
    * オーディオのON/OFF
    */
-  this.setAudioEnabled = function (enabled) {
+  setAudioEnabled(enabled) {
     if (!this.publisherObj) return;
     this.enableAudio = enabled;
     this.publisherObj.publishAudio(this.enableAudio);
-    this.debugLog("setAudioEnabled:", this.enableAudio);
+    this.#debugLog("setAudioEnabled:", this.enableAudio);
     // if(this.enableAudio) {
     //     $("#audio-off-icon").hide();
     // } else {
@@ -446,40 +455,40 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
   /**
    * ビデオのON/OFF
    */
-  this.setVideoEnabled = function (enabled) {
+  setVideoEnabled(enabled) {
     if (!this.publisherObj) return;
     this.enableVideo = enabled;
     this.publisherObj.publishVideo(this.enableVideo);
-    this.debugLog("setVideoEnabled:", this.enableVideo);
+    this.#debugLog("setVideoEnabled:", this.enableVideo);
   };
 
   /**
    * オーディオレベルを取得
    */
-  this.getAudioLevel = function () {
+  getAudioLevel() {
     return this.audioLevel;
   };
 
   /**
    * 画面共有を開始
    */
-  this.screenPublish = async function () {
+  screenPublish() {
     if (!this.publisherObj) return;
     if (!this.isScreenSupported) {
-      this.errorLog("not support browser:");
+      this.#errorLog("not support browser:");
       return;
     }
 
     this.screenPublisherObj = OT.initPublisher(
       this.videoTagId,
       this.screenOpts,
-      function (error) {
+      (error) => {
         if (error) {
-          this.errorLog("initPublisher(screen) error:", error);
+          this.#errorLog("initPublisher(screen) error:", error);
           if (this.screenPublisherObj) this.screenPublisherObj.destroy();
           this.screenPublisherObj = null;
         } else {
-          this.debugLog("initPublisher(screen) success:");
+          this.#debugLog("initPublisher(screen) success:");
           this.isScreenPublished = true;
         }
       }
@@ -488,7 +497,7 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
       .on(
         "destroyed",
         function (event) {
-          this.debugLog("initPublisher(screen) destroyed:", event);
+          this.#debugLog("initPublisher(screen) destroyed:", event);
         },
         this
       )
@@ -496,7 +505,7 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
       .on(
         "streamCreated",
         function (event) {
-          this.debugLog("initPublisher(screen) streamCreated:", event);
+          this.#debugLog("initPublisher(screen) streamCreated:", event);
         },
         this
       )
@@ -504,7 +513,7 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
       .on(
         "streamDestroyed",
         function (event) {
-          this.debugLog("initPublisher(screen) streamDestroyed:", event);
+          this.#debugLog("initPublisher(screen) streamDestroyed:", event);
         },
         this
       )
@@ -512,7 +521,7 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
       .on(
         "videoDimensionsChanged",
         function (event) {
-          this.debugLog("initPublisher(screen) videoDimensionsChanged:", event);
+          this.#debugLog("initPublisher(screen) videoDimensionsChanged:", event);
         },
         this
       );
@@ -521,17 +530,17 @@ const VonageHelper = function (campaignId, apiKey, sessionId, token, events = {}
   /**
    * 画面共有を停止
    */
-  this.screenUnPublish = function () {
+  screenUnPublish() {
     if (!this.sessionObj || !this.screenPublisherObj) return;
     this.sessionObj.unpublish(this.screenPublisherObj);
-    this.debugLog("unpublish(screen) success:");
+    this.#debugLog("unpublish(screen) success:");
     this.isScreenPublished = false;
   };
 
-  this.debugLog = function (type = "debug", object = null) {
+  #debugLog(type = "debug", object = null) {
     console.log(`${type}:`, object);
   };
-  this.errorLog = function (type = "Error", object = null) {
+  #errorLog(type = "Error", object = null) {
     console.error(`${type}:`, object);
   };
 };

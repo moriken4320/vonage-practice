@@ -1,13 +1,39 @@
-const vonageHelper = new VonageHelper(
-    '<%= @campaign.id %>',
-    '<%= @opentok_info[:api_key] %>',
-    '<%= @campaign.session_id %>',
-    '<%= @opentok_info[:token] %>',
-);
-console.log(vonageHelper);
-vonageHelper.initForModerator();
-
-// デバイスソース変更時イベント
-navigator.mediaDevices.ondevicechange = async function(event) {
-    vonageHelper.deviceUpdated();
-}
+const webrtc = new Vue({
+    el: "#video-wrapper",
+    data: {
+        vonageHelper: null,
+    },
+    computed: {
+        publishButtonText() {
+            return this.vonageHelper.isPublished ? 'stop publish' : 'start publish'
+        },
+    },
+    watch: {
+        vonageHelper: {
+            handler: function(newValue) {
+                //console.log(newValue);
+            },
+            deep: true
+        },
+    },
+    created() {
+        this.vonageHelper = new VonageHelper(
+            '<%= @campaign.id %>',
+            '<%= @opentok_info[:api_key] %>',
+            '<%= @campaign.session_id %>',
+            '<%= @opentok_info[:token] %>',
+        );
+    },
+    mounted() {
+        this.vonageHelper.initForModerator();
+        // デバイスソース変更時イベント
+        navigator.mediaDevices.ondevicechange = async function(event) {
+            vonageHelper.deviceUpdated();
+        }
+    },
+    methods: {
+        publish() {
+            this.vonageHelper.isPublished ? this.vonageHelper.unPublish() : this.vonageHelper.publish()
+        }
+    },
+});
