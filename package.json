@@ -1,8 +1,26 @@
 {
   "name": "nexpro-vonage-sample",
   "private": true,
+  "scripts": {
+    "lint:js": "eslint  app/assets --ext .js,.vue",
+    "lint:js:fix": "eslint  app/assets  --ext .js,.vue --fix",
+    "lint:scss": "stylelint app/assets/stylesheets/*",
+    "lint:scss:fix": "stylelint app/assets/stylesheets/* --fix",
+    "format:js": "prettier app//assets/javascripts/*.js -c",
+    "format:js:fix": "prettier app/assets/javascripts/*.js -w",
+    "format:scss": "prettier app/assets/stylesheets/* -c",
+    "format:scss:fix": "prettier app/assets/stylesheets/* -w"
+  },
   "dependencies": {
     "vue": "^2.6.11",
-    "@opentok/client": "^2.21.1"
+    "@opentok/client": "^2.21.1",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.26.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.23.2",
+    "eslint-plugin-jquery": "^1.5.1",
+    "eslint-plugin-vue": "^7.9.0",
+    "prettier": "^2.3.0"
   }
 }

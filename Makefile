@@ -55,3 +55,15 @@ bundle:
 .PHONY: yarn
 yarn:
 	docker-compose exec web yarn install
+
+.PHONY: format-asset
+format-asset:
+	$(info Start formatting...)
+	# @echo 'eslint auto fix:'
+	# docker-compose exec web yarn run lint:js:fix
+	@echo 'prettier js auto fix:'
+	docker-compose exec web yarn run format:js:fix
+	# @echo 'stylelint auto fix:'
+	# docker-compose exec web yarn run lint:scss:fix
+	# @echo 'prettier scss auto fix:'
+	# docker-compose exec web yarn run format:scss:fix
