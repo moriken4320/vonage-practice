@@ -2,8 +2,8 @@
 <p>タイトル：<%= @campaign.title %></p>
 <p>セッションID：<%= @campaign.session_id %></p>
 
-<div id="localVideo"></div>
-
-<script type="text/javascript">
-    <%= render "show.js" %>
-</script>
+<div>
+    <%= link_to "moderator", show_moderator_campaign_path(@campaign) %>
+    <%= link_to "publisher", show_publisher_campaign_path(@campaign) %>
+    <%= link_to "subscriber", show_subscriber_campaign_path(@campaign) %>
+</div>

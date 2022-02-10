@@ -1,0 +1,13 @@
+const vonageHelper = new VonageHelper(
+    '<%= @campaign.id %>',
+    '<%= @opentok_info[:api_key] %>',
+    '<%= @campaign.session_id %>',
+    '<%= @opentok_info[:token] %>',
+);
+console.log(vonageHelper);
+vonageHelper.initForPublisher();
+
+// デバイスソース変更時イベント
+navigator.mediaDevices.ondevicechange = async function(event) {
+    vonageHelper.deviceUpdated();
+}

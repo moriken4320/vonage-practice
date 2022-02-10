@@ -1,4 +1,5 @@
 class CampaignsController < ApplicationController
+    before_action :get_campaign, only: [:show, :show_moderator, :show_publisher, :show_subscriber]
     def test
 
     end
@@ -23,8 +24,19 @@ class CampaignsController < ApplicationController
     end
 
     def show
-        @campaign = Campaign::find(params[:id])
+    end
 
+    def show_moderator
+        # トークン発行
+        if @campaign.present? && @campaign.session_id.present?
+            @opentok_info = VonageService.generate_access_token(
+                { role: :moderator },
+                @campaign.session_id
+            )
+        end
+    end
+
+    def show_publisher
         # トークン発行
         if @campaign.present? && @campaign.session_id.present?
             @opentok_info = VonageService.generate_access_token(
@@ -34,9 +46,23 @@ class CampaignsController < ApplicationController
         end
     end
 
+    def show_subscriber
+        # トークン発行
+        if @campaign.present? && @campaign.session_id.present?
+            @opentok_info = VonageService.generate_access_token(
+                { role: :subscriber },
+                @campaign.session_id
+            )
+        end
+    end
+
     private
 
     def campaign_params
         params.require(:campaign).permit(:title).merge(session_id: VonageService.generate_session.session_id)
+    end
+
+    def get_campaign
+        @campaign = Campaign::find(params[:id])
     end
 end
