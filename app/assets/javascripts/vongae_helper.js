@@ -1,52 +1,52 @@
 class VonageHelper {
   constructor(campaignId, apiKey, sessionId, token, events = {}) {
-        this.campaignId = campaignId;
-        this.apiKey = apiKey;
-        this.sessionId = sessionId;
-        this.token = token;
-        this.events = events;
-        this.videoTagId = "localVideo";
-        this.audioOffImage = null;
-        this.videoOffImage = null;
+    this.campaignId = campaignId;
+    this.apiKey = apiKey;
+    this.sessionId = sessionId;
+    this.token = token;
+    this.events = events;
+    this.videoTagId = "localVideo";
+    this.audioOffImage = null;
+    this.videoOffImage = null;
 
-        // デバイス系
-        this.audioDeviceList = [];
-        this.videoDeviceList = [];
-        this.selectedAudioDeviceId = null;
-        this.selectedVideoDeviceId = null;
+    // デバイス系
+    this.audioDeviceList = [];
+    this.videoDeviceList = [];
+    this.selectedAudioDeviceId = null;
+    this.selectedVideoDeviceId = null;
 
-        // フラグ系
-        this.isSupported = false;
-        this.isScreenSupported = false;
-        this.isFirstSubscribed = false;
-        this.isConnected = false;
-        this.isPublished = false;
-        this.enableVideo = true;
-        this.enableAudio = true;
-        this.isScreenPublished = false;
-        this.isError = false;
+    // フラグ系
+    this.isSupported = false;
+    this.isScreenSupported = false;
+    this.isFirstSubscribed = false;
+    this.isConnected = false;
+    this.isPublished = false;
+    this.enableVideo = true;
+    this.enableAudio = true;
+    this.isScreenPublished = false;
+    this.isError = false;
 
-        // vonage関連のオブジェクト
-        this.sessionObj = null;
-        this.publisherObj = null;
-        this.videoOpts = {
-          fitMode: "contain",
-          insertMode: "append",
-          width: 1280,
-          height: 720,
-          style: {
-            audioLevelDisplayMode: "off",
-            archiveStatusDisplayMode: "on",
-            backgroundImageURI: this.videoOffImage, // ビデオが表示されていないときの背景画像
-            buttonDisplayMode: "off",
-            nameDisplayMode: "off",
-          },
-        };
-        this.screenPublisherObj = null;
-        this.screenOpts = {
-          videoSource: "screen",
-          videoContentHint: "detail",
-        };
+    // vonage関連のオブジェクト
+    this.sessionObj = null;
+    this.publisherObj = null;
+    this.videoOpts = {
+      fitMode: "contain",
+      insertMode: "append",
+      width: 1280,
+      height: 720,
+      style: {
+        audioLevelDisplayMode: "off",
+        archiveStatusDisplayMode: "on",
+        backgroundImageURI: this.videoOffImage, // ビデオが表示されていないときの背景画像
+        buttonDisplayMode: "off",
+        nameDisplayMode: "off",
+      },
+    };
+    this.screenPublisherObj = null;
+    this.screenOpts = {
+      videoSource: "screen",
+      videoContentHint: "detail",
+    };
   }
 
   /**
@@ -62,22 +62,22 @@ class VonageHelper {
   /**
    * publisher用init処理
    */
-   async initForPublisher() {
+  async initForPublisher() {
     this.initOT();
     await this.getDevices();
     this.initPublisher();
     this.initSession();
-  };
+  }
 
   /**
    * subscriber用init処理
    */
-   async initForSubscriber() {
+  async initForSubscriber() {
     this.initOT();
     await this.getDevices();
     this.initPublisher();
     this.initSession();
-  };
+  }
 
   /**
    * OTの初期設定
@@ -99,7 +99,7 @@ class VonageHelper {
         response.supported && response.extensionRegistered !== false;
     });
     this.isScreenSupported = isScreenSupported;
-  };
+  }
 
   /**
    * session接続処理
@@ -228,23 +228,23 @@ class VonageHelper {
     } else {
       this.#errorLog("not supported browser.");
     }
-  };
+  }
 
   /**
    * session切断処理
    */
   sessionDisconnect() {
     if (this.sessionObj) this.sessionObj.disconnect();
-  };
+  }
 
   /**
    * publisher作成処理
    */
   initPublisher() {
     const options = {
-        audioSource: this.selectedAudioDeviceId,
-        videoSource: this.selectedVideoDeviceId,
-    }
+      audioSource: this.selectedAudioDeviceId,
+      videoSource: this.selectedVideoDeviceId,
+    };
     $.extend(this.videoOpts, options);
 
     this.publisherObj = OT.initPublisher(
@@ -252,13 +252,13 @@ class VonageHelper {
       this.videoOpts,
       (error) => {
         if (error) {
-            this.#errorLog("initPublisher error:", error);
-            if (this.publisherObj) this.publisherObj.destroy();
-            this.publisherObj = null;
-          } else {
-            this.#debugLog("initPublisher success:");
-            // this.createRemoteAudioOffIcon();
-          }
+          this.#errorLog("initPublisher error:", error);
+          if (this.publisherObj) this.publisherObj.destroy();
+          this.publisherObj = null;
+        } else {
+          this.#debugLog("initPublisher success:");
+          // this.createRemoteAudioOffIcon();
+        }
       }
     )
       // カメラとマイクへのアクセスを許可したときにディスパッチ
@@ -335,7 +335,7 @@ class VonageHelper {
         },
         this
       );
-  };
+  }
 
   /**
    * 配信開始
@@ -345,14 +345,14 @@ class VonageHelper {
     if (this.sessionObj && this.publisherObj) {
       this.sessionObj.publish(this.publisherObj, (error) => {
         if (error) {
-            this.#errorLog("publish error:", error);
-          } else {
-            this.#debugLog("publish success:");
-            this.isPublished = true;
-          }
+          this.#errorLog("publish error:", error);
+        } else {
+          this.#debugLog("publish success:");
+          this.isPublished = true;
+        }
       });
     }
-  };
+  }
 
   /**
    * 配信停止
@@ -364,58 +364,64 @@ class VonageHelper {
       this.#debugLog("unpublish success:");
       this.isPublished = false;
     }
-  };
+  }
 
   /**
    * マイク、カメラデバイスの取得
    */
   async getDevices() {
     return new Promise((resolve) => {
-        OT.getDevices((error, devices) => {
-            if (error) {
-              this.#errorLog("getDevices error:", error);
-              return;
-            }
+      OT.getDevices((error, devices) => {
+        if (error) {
+          this.#errorLog("getDevices error:", error);
+          return;
+        }
 
-            this.audioDeviceList = devices.filter(
-              (device) => device.kind === "audioInput"
-            );
-            this.videoDeviceList = devices.filter(
-              (device) => device.kind === "videoInput"
-            );
-            this.#debugLog("audioList:", this.audioDeviceList);
-            this.#debugLog("videoList:", this.videoDeviceList);
+        this.audioDeviceList = devices.filter(
+          (device) =>
+            device.kind === "audioInput" && device.deviceId !== "default"
+        );
+        this.videoDeviceList = devices.filter(
+          (device) =>
+            device.kind === "videoInput" && device.deviceId !== "default"
+        );
+        this.#debugLog("audioList:", this.audioDeviceList);
+        this.#debugLog("videoList:", this.videoDeviceList);
 
-            this.selectedAudioDeviceId = this.audioDeviceList[0].deviceId;
-            this.selectedVideoDeviceId = this.videoDeviceList[0].deviceId;
-            this.#debugLog("selectedAudioDeviceId:", this.selectedAudioDeviceId);
-            this.#debugLog("selectedVideoDeviceId:", this.selectedVideoDeviceId);
+        this.selectedAudioDeviceId
+          ? null
+          : (this.selectedAudioDeviceId = this.audioDeviceList[0].deviceId);
+        this.selectedVideoDeviceId
+          ? null
+          : (this.selectedVideoDeviceId = this.videoDeviceList[0].deviceId);
+        this.#debugLog("selectedAudioDeviceId:", this.selectedAudioDeviceId);
+        this.#debugLog("selectedVideoDeviceId:", this.selectedVideoDeviceId);
 
-            resolve();
-          });
+        resolve();
+      });
     });
-  };
+  }
 
   /**
    * デバイス更新
    */
-  deviceUpdated() {
-    this.getDevices();
+  async deviceUpdated() {
+    await this.getDevices();
     if (
       !this.audioDeviceList.some(
         (device) => device.deviceId === this.selectedAudioDeviceId
       )
     ) {
-      this.setAudioSource("default");
+      this.setAudioSource(this.audioDeviceList[0].deviceId);
     }
     if (
       !this.videoDeviceList.some(
         (device) => device.deviceId === this.selectedVideoDeviceId
       )
     ) {
-      this.setAudioSource("default");
+      this.setVideoSource(this.videoDeviceList[0].deviceId);
     }
-  };
+  }
 
   /**
    * マイクソースの変更
@@ -425,7 +431,7 @@ class VonageHelper {
     this.selectedAudioDeviceId = audioDeviceId;
     this.publisherObj.setAudioSource(this.selectedAudioDeviceId);
     this.#debugLog("setAudioSource:", this.selectedAudioDeviceId);
-  };
+  }
 
   /**
    * カメラソースの変更
@@ -435,7 +441,7 @@ class VonageHelper {
     this.selectedVideoDeviceId = videoDeviceId;
     this.publisherObj.setVideoSource(this.selectedVideoDeviceId);
     this.#debugLog("setVideoSource:", this.selectedVideoDeviceId);
-  };
+  }
 
   /**
    * オーディオのON/OFF
@@ -450,7 +456,7 @@ class VonageHelper {
     // } else {
     //     $("#audio-off-icon").show();
     // }
-  };
+  }
 
   /**
    * ビデオのON/OFF
@@ -460,14 +466,14 @@ class VonageHelper {
     this.enableVideo = enabled;
     this.publisherObj.publishVideo(this.enableVideo);
     this.#debugLog("setVideoEnabled:", this.enableVideo);
-  };
+  }
 
   /**
    * オーディオレベルを取得
    */
   getAudioLevel() {
     return this.audioLevel;
-  };
+  }
 
   /**
    * 画面共有を開始
@@ -521,11 +527,14 @@ class VonageHelper {
       .on(
         "videoDimensionsChanged",
         function (event) {
-          this.#debugLog("initPublisher(screen) videoDimensionsChanged:", event);
+          this.#debugLog(
+            "initPublisher(screen) videoDimensionsChanged:",
+            event
+          );
         },
         this
       );
-  };
+  }
 
   /**
    * 画面共有を停止
@@ -535,12 +544,12 @@ class VonageHelper {
     this.sessionObj.unpublish(this.screenPublisherObj);
     this.#debugLog("unpublish(screen) success:");
     this.isScreenPublished = false;
-  };
+  }
 
   #debugLog(type = "debug", object = null) {
     console.log(`${type}:`, object);
-  };
+  }
   #errorLog(type = "Error", object = null) {
     console.error(`${type}:`, object);
-  };
-};
+  }
+}

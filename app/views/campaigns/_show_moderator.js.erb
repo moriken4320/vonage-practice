@@ -11,7 +11,7 @@ const webrtc = new Vue({
     watch: {
         vonageHelper: {
             handler: function(newValue) {
-                //console.log(newValue);
+                console.log(newValue);
             },
             deep: true
         },
@@ -27,8 +27,8 @@ const webrtc = new Vue({
     mounted() {
         this.vonageHelper.initForModerator();
         // デバイスソース変更時イベント
-        navigator.mediaDevices.ondevicechange = async function(event) {
-            vonageHelper.deviceUpdated();
+        navigator.mediaDevices.ondevicechange = async (event) => {
+            await this.vonageHelper.deviceUpdated();
         }
     },
     methods: {
