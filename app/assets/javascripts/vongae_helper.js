@@ -30,17 +30,18 @@ class VonageHelper {
     this.sessionObj = null;
     this.publisherObj = null;
     this.videoOpts = {
-      fitMode: "contain",
+      fitMode: "cover",
       insertMode: "append",
-      width: 1280,
-      height: 720,
+      width: "100%",
+      height: "100%",
       style: {
         audioLevelDisplayMode: "off",
         archiveStatusDisplayMode: "on",
         backgroundImageURI: this.videoOffImage, // ビデオが表示されていないときの背景画像
         buttonDisplayMode: "off",
-        nameDisplayMode: "off",
+        nameDisplayMode: "on",
       },
+      name: "test",
     };
     this.screenPublisherObj = null;
     this.screenOpts = {
@@ -76,8 +77,6 @@ class VonageHelper {
    */
   async initForSubscriber() {
     this.initOT();
-    await this.getDevices();
-    this.initPublisher();
     this.initSession();
   }
 
