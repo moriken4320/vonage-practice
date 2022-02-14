@@ -5,7 +5,7 @@ class VonageHelper {
     this.sessionId = sessionId;
     this.token = token;
     this.events = events;
-    this.videoTagId = "localVideo";
+    this.videoTagId = "videos";
     this.audioOffImage = null;
     this.videoOffImage = null;
 
@@ -26,7 +26,7 @@ class VonageHelper {
     this.isPublished = false;
     this.enableVideo = true;
     this.enableAudio = true;
-    this.isScreenPublished = false;
+    this.isScreenShared = false;
     this.isError = false;
 
     // vonage関連のオブジェクト
@@ -49,6 +49,18 @@ class VonageHelper {
     this.screenPublisherObj = null;
     this.screenOpts = {
       videoSource: "screen",
+      fitMode: "contain",
+      insertMode: "append",
+      width: "100%",
+      height: "100%",
+      style: {
+        audioLevelDisplayMode: "off",
+        archiveStatusDisplayMode: "on",
+        backgroundImageURI: this.videoOffImage, // ビデオが表示されていないときの背景画像
+        buttonDisplayMode: "off",
+        nameDisplayMode: "on",
+      },
+      name: `${this.user.name}の画面共有`,
       videoContentHint: "detail",
     };
 
@@ -479,12 +491,14 @@ class VonageHelper {
   /**
    * 画面共有を開始
    */
-  screenPublish() {
-    if (!this.publisherObj) return;
+  startScreenShare() {
+    if (!this.isPublished) return;
     if (!this.isScreenSupported) {
       this.#errorLog("not support browser:");
       return;
     }
+
+    if(this.isScreenShared) this.stopScreenShare();
 
     this.screenPublisherObj = OT.initPublisher(
       this.videoTagId,
@@ -496,7 +510,7 @@ class VonageHelper {
           this.screenPublisherObj = null;
         } else {
           this.#debugLog("initPublisher(screen) success:");
-          this.isScreenPublished = true;
+          this.isScreenShared = true;
         }
       }
     )
@@ -505,6 +519,7 @@ class VonageHelper {
         "destroyed",
         function (event) {
           this.#debugLog("initPublisher(screen) destroyed:", event);
+          this.isScreenShared = false;
         },
         this
       )
@@ -540,11 +555,10 @@ class VonageHelper {
   /**
    * 画面共有を停止
    */
-  screenUnPublish() {
-    if (!this.sessionObj || !this.screenPublisherObj) return;
-    this.sessionObj.unpublish(this.screenPublisherObj);
-    this.#debugLog("unpublish(screen) success:");
-    this.isScreenPublished = false;
+  stopScreenShare() {
+    if (!this.screenPublisherObj || !this.isScreenShared) return;
+    this.screenPublisherObj.destroy();
+    this.screenPublisherObj = null;
   }
 
   #debugLog(type = "debug", object = null) {
