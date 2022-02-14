@@ -63,6 +63,22 @@ class VonageHelper {
       name: `${this.user.name}の画面共有`,
       videoContentHint: "detail",
     };
+    this.subscribeObjs = [];
+    this.subscribeOpts = {
+      fitMode: "contain",
+      insertMode: "append",
+      width: "100%",
+      height: "100%",
+      style: {
+        audioBlockedDisplayMode: "off",
+        audioLevelDisplayMode: "off",
+        backgroundImageURI: this.videoOffImage, // ビデオが表示されていないときの背景画像
+        buttonDisplayMode: "off",
+        nameDisplayMode: "on",
+        videoDisabledDisplayMode: "on",
+      },
+      testNetwork: true,
+    };
 
     this.audioLevel = 0;
   }
@@ -216,6 +232,8 @@ class VonageHelper {
           "streamCreated",
           function (event) {
             this.#debugLog("session streamCreated:", event);
+            this.subscribeObjs.push(this.subscribe(event.stream));
+            console.error(this.subscribeObjs);
           },
           this
         )
@@ -388,6 +406,63 @@ class VonageHelper {
       this.#debugLog("unpublish success:");
       this.isPublished = false;
     }
+  }
+
+  /**
+   * サブスクライブ
+   */
+  subscribe(stream) {
+    return this.sessionObj.subscribe(stream, this.videoTagId, this.subscribeOpts, (error) => {
+      if (error) this.#errorLog("subscribe error", error);
+    })
+    // ブラウザの自動再生ポリシーのためにサブスクライバーのオーディオがブロックされたときにディスパッチ
+    .on("audioBlocked", (event) => {
+      this.#debugLog("subscribe audioBlocked:", event);
+    }, this)
+    // １秒間に60回(ブラウザによる)ディスパッチ
+    // 他人の音声レベルを示すための数値(0.0~1.0)を定期的に送信する
+    .on("audioLevelUpdated", (event) => {
+    }, this)
+    // ブラウザの自動再生ポリシーのために一時停止した後、サブスクライバーのオーディオのブロックが解除されたときにディスパッチ
+    .on("audioUnblocked", (event) => {
+      this.#debugLog("subscribe audioUnblocked:", event);
+    }, this)
+    // サブスクライバーが'disconnect'イベントをディスパッチした後、サブスクライバーのストリームが再開されたときにディスパッチ
+    .on("connected", (event) => {
+      this.#debugLog("subscribe connected:", event);
+    }, this)
+    // サブスクライバー要素がHTMLDOMから削除されたときにディスパッチ
+    .on("destroyed", (event) => {
+      this.#debugLog("subscribe destroyed:", event);
+    }, this)
+    // サブスクライバーのストリームが中断されたときにディスパッチ
+    .on("disconnected", (event) => {
+      this.#debugLog("subscribe disconnected:", event);
+    }, this)
+    // ビデオのビデオサイズが変更されたときにディスパッチ
+    .on("videoDimensionsChanged", (event) => {
+      this.#debugLog("subscribe videoDimensionsChanged:", event);
+    }, this)
+    // サブスクライバーのビデオが無効になっている場合にディスパッチ
+    .on("videoDisabled", (event) => {
+      this.#debugLog("subscribe videoDisabled:", event);
+    }, this)
+    // ストリーム品質が低下したと判断した場合にディスパッチ
+    .on("videoDisableWarning", (event) => {
+      this.#debugLog("subscribe videoDisableWarning:", event);
+    }, this)
+    // ビデオが無効になっている状態から、ストリーム品質が向上したと判断した場合にディスパッチ
+    .on("videoDisableWarningLifted", (event) => {
+      this.#debugLog("subscribe videoDisableWarningLifted:", event);
+    }, this)
+    // サブスクライバーのビデオ要素が作成されたときにディスパッチ
+    .on("videoElementCreated", (event) => {
+      this.#debugLog("subscribe videoElementCreated:", event);
+    }, this)
+    // ビデオが以前に無効にされた後、サブスクライバーへのビデオの送信を再開したときにディスパッチ
+    .on("videoEnabled", (event) => {
+      this.#debugLog("subscribe videoEnabled:", event);
+    }, this);
   }
 
   /**
