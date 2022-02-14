@@ -32,6 +32,7 @@ const webrtc = new Vue({
             '<%= @opentok_info[:api_key] %>',
             '<%= @campaign.session_id %>',
             '<%= @opentok_info[:token] %>',
+            {name: 'host-name'},
         );
     },
     mounted() {

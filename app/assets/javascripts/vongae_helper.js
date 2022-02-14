@@ -1,5 +1,5 @@
 class VonageHelper {
-  constructor(campaignId, apiKey, sessionId, token, events = {}) {
+  constructor(campaignId, apiKey, sessionId, token, user, events = {}) {
     this.campaignId = campaignId;
     this.apiKey = apiKey;
     this.sessionId = sessionId;
@@ -8,6 +8,9 @@ class VonageHelper {
     this.videoTagId = "localVideo";
     this.audioOffImage = null;
     this.videoOffImage = null;
+
+    // ユーザー情報
+    this.user = user;
 
     // デバイス系
     this.audioDeviceList = [];
@@ -41,7 +44,7 @@ class VonageHelper {
         buttonDisplayMode: "off",
         nameDisplayMode: "on",
       },
-      name: "test",
+      name: this.user.name,
     };
     this.screenPublisherObj = null;
     this.screenOpts = {
