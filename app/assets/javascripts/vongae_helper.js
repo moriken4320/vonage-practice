@@ -248,7 +248,11 @@ class VonageHelper {
   sessionConnect() {
     if (this.sessionObj) {
         this.sessionObj.connect(this.token, (error) => {
-          if (error) this.#errorLog("session connect error:", error);
+          if (error) {
+            this.#errorLog("session connect error:", error);
+          } else {
+            this.publish();
+          }
         });
       }
   }
@@ -510,7 +514,11 @@ class VonageHelper {
           this.screenPublisherObj = null;
         } else {
           this.#debugLog("initPublisher(screen) success:");
-          this.isScreenShared = true;
+          if (this.sessionObj && this.screenPublisherObj) {
+            this.sessionObj.publish(this.screenPublisherObj, (error) => {
+              if (error) this.#errorLog("publish(screen) error:", error);
+            });
+          }
         }
       }
     )
@@ -519,7 +527,6 @@ class VonageHelper {
         "destroyed",
         function (event) {
           this.#debugLog("initPublisher(screen) destroyed:", event);
-          this.isScreenShared = false;
         },
         this
       )
@@ -528,6 +535,7 @@ class VonageHelper {
         "streamCreated",
         function (event) {
           this.#debugLog("initPublisher(screen) streamCreated:", event);
+          this.isScreenShared = true;
         },
         this
       )
@@ -536,6 +544,7 @@ class VonageHelper {
         "streamDestroyed",
         function (event) {
           this.#debugLog("initPublisher(screen) streamDestroyed:", event);
+          this.isScreenShared = false;
         },
         this
       )
