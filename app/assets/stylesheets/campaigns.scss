@@ -2,8 +2,26 @@
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
+#video-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
 #localVideo {
     width: 100%;
     padding: 2rem 0;
     aspect-ratio: 16 / 9;
+}
+
+#audio-level {
+    width: 150px;
+    height: 20px;
+    background-color: black;
+
+    > div {
+        background-color: red;
+        width: 0;
+        height: 100%;
+    }
 }

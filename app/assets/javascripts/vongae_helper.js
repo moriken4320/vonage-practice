@@ -30,7 +30,7 @@ class VonageHelper {
     this.sessionObj = null;
     this.publisherObj = null;
     this.videoOpts = {
-      fitMode: "cover",
+      fitMode: "contain",
       insertMode: "append",
       width: "100%",
       height: "100%",
@@ -55,10 +55,12 @@ class VonageHelper {
   /**
    * moderator用init処理
    */
-  async initForModerator() {
+  initForModerator() {
     this.initOT();
-    await this.getDevices();
     this.initPublisher();
+    setTimeout(async () => {
+        await this.deviceUpdated();
+    }, 100);
     this.initSession();
   }
 
@@ -67,8 +69,10 @@ class VonageHelper {
    */
   async initForPublisher() {
     this.initOT();
-    await this.getDevices();
     this.initPublisher();
+    setTimeout(async () => {
+        await this.deviceUpdated();
+    }, 100);
     this.initSession();
   }
 
@@ -245,12 +249,6 @@ class VonageHelper {
    * publisher作成処理
    */
   initPublisher() {
-    const options = {
-      audioSource: this.selectedAudioDeviceId,
-      videoSource: this.selectedVideoDeviceId,
-    };
-    $.extend(this.videoOpts, options);
-
     this.publisherObj = OT.initPublisher(
       this.videoTagId,
       this.videoOpts,
@@ -270,6 +268,9 @@ class VonageHelper {
         "accessAllowed",
         function (event) {
           this.#debugLog("initPublisher accessAllowed:", event);
+          setTimeout(async () => {
+            await this.deviceUpdated();
+          }, 100);
         },
         this
       )

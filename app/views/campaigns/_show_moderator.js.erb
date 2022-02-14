@@ -2,6 +2,7 @@ const webrtc = new Vue({
     el: "#video-wrapper",
     data: {
         vonageHelper: null,
+        audioLevel: 0,
     },
     computed: {
         connectButtonText() {
@@ -35,6 +36,11 @@ const webrtc = new Vue({
     },
     mounted() {
         this.vonageHelper.initForModerator();
+        // オーディオレベルを取得
+        setInterval(() => {
+            $("#audio-level > div").width(`${this.vonageHelper.audioLevel * 100}%`);
+        }, 100);
+
         // デバイスソース変更時イベント
         navigator.mediaDevices.ondevicechange = async (event) => {
             await this.vonageHelper.deviceUpdated();
