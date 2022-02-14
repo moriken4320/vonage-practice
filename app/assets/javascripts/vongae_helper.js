@@ -47,6 +47,8 @@ class VonageHelper {
       videoSource: "screen",
       videoContentHint: "detail",
     };
+
+    this.audioLevel = 0;
   }
 
   /**
@@ -469,13 +471,6 @@ class VonageHelper {
     this.enableVideo = enabled;
     this.publisherObj.publishVideo(this.enableVideo);
     this.#debugLog("setVideoEnabled:", this.enableVideo);
-  }
-
-  /**
-   * オーディオレベルを取得
-   */
-  getAudioLevel() {
-    return this.audioLevel;
   }
 
   /**
