@@ -5,7 +5,12 @@
 <div id="video-wrapper">
     <div id="localVideo"></div>
     <div id="user-interface">
-        <button @click="publish">{{ publishButtonText }}</button>
+        <div>
+            <button @click="connect">{{ connectButtonText }}</button>
+            <button @click="publish" v-if="vonageHelper.isConnected">{{ publishButtonText }}</button>
+            <button @click="vonageHelper.setAudioEnabled(!vonageHelper.enableAudio)">{{ audioButtonText }}</button>
+            <button @click="vonageHelper.setVideoEnabled(!vonageHelper.enableVideo)">{{ videoButtonText }}</button>
+        </div>
         <div>
             <select @change="vonageHelper.setAudioSource(event.target.value)">
                 <option

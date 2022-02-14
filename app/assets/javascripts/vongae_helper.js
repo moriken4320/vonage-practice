@@ -153,6 +153,7 @@ class VonageHelper {
           "sessionConnected",
           function (event) {
             this.#debugLog("session sessionConnected:", event);
+            this.isConnected = true;
           },
           this
         )
@@ -162,10 +163,7 @@ class VonageHelper {
           function (event) {
             this.#debugLog("session sessionDisconnected:", event);
             this.isConnected = false;
-            if (this.publisherObj) {
-              this.publisherObj.destroy();
-              this.publisherObj = null;
-            }
+            if (this.isPublished) this.unPublish();
           },
           this
         )
@@ -219,15 +217,20 @@ class VonageHelper {
           },
           this
         );
+    } else {
+      this.#errorLog("not supported browser.");
+    }
+  }
 
-      if (this.sessionObj) {
+  /**
+   * session接続処理
+   */
+  sessionConnect() {
+    if (this.sessionObj) {
         this.sessionObj.connect(this.token, (error) => {
           if (error) this.#errorLog("session connect error:", error);
         });
       }
-    } else {
-      this.#errorLog("not supported browser.");
-    }
   }
 
   /**

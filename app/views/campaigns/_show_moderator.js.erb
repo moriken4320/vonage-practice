@@ -4,8 +4,17 @@ const webrtc = new Vue({
         vonageHelper: null,
     },
     computed: {
+        connectButtonText() {
+            return this.vonageHelper.isConnected ? 'dis connect' : 'connect'
+        },
         publishButtonText() {
             return this.vonageHelper.isPublished ? 'stop publish' : 'start publish'
+        },
+        audioButtonText() {
+            return this.vonageHelper.enableAudio ? 'stop audio' : 'start audio'
+        },
+        videoButtonText() {
+            return this.vonageHelper.enableVideo ? 'stop video' : 'start video'
         },
     },
     watch: {
@@ -32,6 +41,9 @@ const webrtc = new Vue({
         }
     },
     methods: {
+        connect() {
+            this.vonageHelper.isConnected ? this.vonageHelper.sessionDisconnect() : this.vonageHelper.sessionConnect()
+        },
         publish() {
             this.vonageHelper.isPublished ? this.vonageHelper.unPublish() : this.vonageHelper.publish()
         }
