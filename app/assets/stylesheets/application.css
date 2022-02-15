@@ -14,6 +14,10 @@
  *= require_self
  */
 
- html {
-     font-size: 16px;
- }
+html {
+    font-size: 16px;
+}
+
+div {
+    box-sizing: border-box;
+}

@@ -3,6 +3,7 @@ const webrtc = new Vue({
     data: {
         vonageHelper: null,
         audioLevel: 0,
+        signalText: '',
     },
     computed: {
         connectButtonText() {
@@ -47,6 +48,11 @@ const webrtc = new Vue({
     methods: {
         connect() {
             this.vonageHelper.isConnected ? this.vonageHelper.sessionDisconnect() : this.vonageHelper.sessionConnect()
+        },
+        sendSignal() {
+            if (this.signalText === '') return;
+            this.vonageHelper.sendSignal('chat', this.signalText);
+            this.signalText = '';
         },
     },
 });

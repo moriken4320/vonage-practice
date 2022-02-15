@@ -81,6 +81,9 @@ class VonageHelper {
     };
 
     this.audioLevel = 0;
+
+    // 受け取ったsignalを格納するオブジェクト
+    this.signalObj = [];
   }
 
   /**
@@ -100,10 +103,6 @@ class VonageHelper {
    */
   async initForPublisher() {
     this.initOT();
-    this.initPublisher();
-    setTimeout(async () => {
-      await this.deviceUpdated();
-    }, 100);
     this.initSession();
   }
 
@@ -135,6 +134,16 @@ class VonageHelper {
         response.supported && response.extensionRegistered !== false;
     });
     this.isScreenSupported = isScreenSupported;
+  }
+
+  /**
+   * nameをセット
+   * @param {string} name
+   */
+  setName(name) {
+    this.user.name = name;
+    this.videoOpts.name = this.user.name;
+    this.screenOpts.name = `${this.user.name}の画面共有`;
   }
 
   /**
@@ -224,6 +233,7 @@ class VonageHelper {
           "signal",
           function (event) {
             this.#debugLog("session signal:", event);
+            this.signalObj.push({type: event.type, data: event.data, from: event.from});
           },
           this
         )
@@ -233,7 +243,6 @@ class VonageHelper {
           function (event) {
             this.#debugLog("session streamCreated:", event);
             this.subscribeObjs.push(this.subscribe(event.stream));
-            console.error(this.subscribeObjs);
           },
           this
         )
@@ -280,6 +289,27 @@ class VonageHelper {
    */
   sessionDisconnect() {
     if (this.sessionObj) this.sessionObj.disconnect();
+  }
+
+  /**
+   * signal送信
+   * @param {string} type
+   * @param {string} data
+   * @returns
+   */
+  sendSignal(type, data) {
+    if (!this.sessionObj) return;
+    this.sessionObj.signal({
+      type: type,
+      data: data
+    },
+    (error) => {
+      if (error) {
+        this.#errorLog("signal error", error);
+      } else {
+        this.#debugLog("signal sent", {type: type, data: data});
+      }
+    });
   }
 
   /**

@@ -1,13 +1,69 @@
-const vonageHelper = new VonageHelper(
-    '<%= @campaign.id %>',
-    '<%= @opentok_info[:api_key] %>',
-    '<%= @campaign.session_id %>',
-    '<%= @opentok_info[:token] %>',
-);
-console.log(vonageHelper);
-vonageHelper.initForPublisher();
+const webrtc = new Vue({
+    el: "#publisher-wrapper",
+    data: {
+        vonageHelper: null,
+        userName: '',
+        isVerified: false,
+        audioLevel: 0,
+        signalText: '',
+    },
+    computed: {
+        connectButtonText() {
+            return this.vonageHelper.isConnected ? 'dis connect' : 'connect'
+        },
+        audioButtonText() {
+            return this.vonageHelper.enableAudio ? 'stop audio' : 'start audio'
+        },
+        videoButtonText() {
+            return this.vonageHelper.enableVideo ? 'stop video' : 'start video'
+        },
+    },
+    watch: {
+        vonageHelper: {
+            handler: function(newValue) {
+                //console.log(newValue);
+            },
+            deep: true
+        },
+    },
+    created() {
+        this.vonageHelper = new VonageHelper(
+            '<%= @campaign.id %>',
+            '<%= @opentok_info[:api_key] %>',
+            '<%= @campaign.session_id %>',
+            '<%= @opentok_info[:token] %>',
+            {name: 'publisher-name'},
+        );
+    },
+    mounted() {
+        this.vonageHelper.initForPublisher();
+        // オーディオレベルを取得
+        setInterval(() => {
+            $("#audio-level > div").width(`${this.vonageHelper.audioLevel * 100}%`);
+        }, 100);
 
-// デバイスソース変更時イベント
-navigator.mediaDevices.ondevicechange = async function(event) {
-    vonageHelper.deviceUpdated();
-}
+        // デバイスソース変更時イベント
+        navigator.mediaDevices.ondevicechange = async (event) => {
+            await this.vonageHelper.deviceUpdated();
+        }
+    },
+    methods: {
+        connect() {
+            this.vonageHelper.isConnected ? this.vonageHelper.sessionDisconnect() : this.vonageHelper.sessionConnect()
+        },
+        authRequest() {
+            if (this.userName === '') return;
+            this.vonageHelper.setName(this.userName);
+            this.vonageHelper.initPublisher();
+            setTimeout(async () => {
+            await this.vonageHelper.deviceUpdated();
+            }, 100);
+            this.isVerified = true;
+        },
+        sendSignal() {
+            if (this.signalText === '') return;
+            this.vonageHelper.sendSignal('chat', this.signalText);
+            this.signalText = '';
+        },
+    },
+});

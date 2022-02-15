@@ -3,35 +3,44 @@
 <p>セッションID：<%= @campaign.session_id %></p>
 
 <div id="moderator-wrapper">
-    <div id="videos"></div>
-    <div id="user-interface">
-        <div>
-            <button @click="connect">{{ connectButtonText }}</button>
-            <button @click="vonageHelper.setAudioEnabled(!vonageHelper.enableAudio)">{{ audioButtonText }}</button>
-            <button @click="vonageHelper.setVideoEnabled(!vonageHelper.enableVideo)">{{ videoButtonText }}</button>
-            <button @click="vonageHelper.startScreenShare()" v-if="vonageHelper.isPublished">screen share</button>
+    <div id="video-wrapper">
+        <div id="videos"></div>
+        <div id="user-interface">
+            <div>
+                <button @click="connect">{{ connectButtonText }}</button>
+                <button @click="vonageHelper.setAudioEnabled(!vonageHelper.enableAudio)">{{ audioButtonText }}</button>
+                <button @click="vonageHelper.setVideoEnabled(!vonageHelper.enableVideo)">{{ videoButtonText }}</button>
+                <button @click="vonageHelper.startScreenShare()" v-if="vonageHelper.isPublished">screen share</button>
+            </div>
+            <div>
+                <select @change="vonageHelper.setAudioSource(event.target.value)">
+                    <option
+                    v-for="audioDevice in vonageHelper.audioDeviceList"
+                    :value="audioDevice.deviceId"
+                    :selected="vonageHelper.selectedAudioDeviceId === audioDevice.deviceId">
+                        {{ audioDevice.label }}
+                    </option>
+                </select>
+                <select @change="vonageHelper.setVideoSource(event.target.value)">
+                    <option
+                    v-for="videoDevice in vonageHelper.videoDeviceList"
+                    :value="videoDevice.deviceId"
+                    :selected="vonageHelper.selectedVideoDeviceId === videoDevice.deviceId">
+                        {{  videoDevice.label }}
+                    </option>
+                </select>
+            </div>
         </div>
-        <div>
-            <select @change="vonageHelper.setAudioSource(event.target.value)">
-                <option
-                v-for="audioDevice in vonageHelper.audioDeviceList"
-                :value="audioDevice.deviceId"
-                :selected="vonageHelper.selectedAudioDeviceId === audioDevice.deviceId">
-                    {{ audioDevice.label }}
-                </option>
-            </select>
-            <select @change="vonageHelper.setVideoSource(event.target.value)">
-                <option
-                v-for="videoDevice in vonageHelper.videoDeviceList"
-                :value="videoDevice.deviceId"
-                :selected="vonageHelper.selectedVideoDeviceId === videoDevice.deviceId">
-                    {{  videoDevice.label }}
-                </option>
-            </select>
+        <div id="information">
+            <div id="audio-level"><div></div></div>
         </div>
-    </div>
-    <div id="information">
-        <div id="audio-level"><div></div></div>
+        <div id="message-area" v-if="vonageHelper.isConnected">
+            <div>
+                <input type="text" v-model="signalText">
+                <button @click="sendSignal">送信</button>
+            </div>
+            <div v-for="signal in vonageHelper.signalObj">type: {{ signal.type }}, data: {{ signal.data }}</div>
+        </div>
     </div>
 </div>
 
