@@ -65,3 +65,4 @@ gem 'jquery-rails'
 
 # vonage video api
 gem 'opentok', '~> 4.0.0'
+gem 'devise'
