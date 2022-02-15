@@ -242,7 +242,9 @@ class VonageHelper {
           "streamCreated",
           function (event) {
             this.#debugLog("session streamCreated:", event);
-            this.subscribeObjs.push(this.subscribe(event.stream));
+            const videoType = event.stream.videoType;
+            if(videoType === "screen") this.stopScreenShare();
+            this.subscribeObjs.push({videoType: event.stream.videoType, subscribe: this.subscribe(event.stream)});
           },
           this
         )
@@ -650,6 +652,11 @@ class VonageHelper {
     if (!this.isPublished) return;
     if (!this.isScreenSupported) {
       this.#errorLog("not support browser:");
+      return;
+    }
+
+    if (this.subscribeObjs.some((subscribe) => subscribe.videoType === "screen")) {
+      this.#errorLog("other user already share screen");
       return;
     }
 
