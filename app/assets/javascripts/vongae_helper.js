@@ -90,7 +90,7 @@ class VonageHelper {
     this.initOT();
     this.initPublisher();
     setTimeout(async () => {
-        await this.deviceUpdated();
+      await this.deviceUpdated();
     }, 100);
     this.initSession();
   }
@@ -102,7 +102,7 @@ class VonageHelper {
     this.initOT();
     this.initPublisher();
     setTimeout(async () => {
-        await this.deviceUpdated();
+      await this.deviceUpdated();
     }, 100);
     this.initSession();
   }
@@ -265,14 +265,14 @@ class VonageHelper {
    */
   sessionConnect() {
     if (this.sessionObj) {
-        this.sessionObj.connect(this.token, (error) => {
-          if (error) {
-            this.#errorLog("session connect error:", error);
-          } else {
-            this.publish();
-          }
-        });
-      }
+      this.sessionObj.connect(this.token, (error) => {
+        if (error) {
+          this.#errorLog("session connect error:", error);
+        } else {
+          this.publish();
+        }
+      });
+    }
   }
 
   /**
@@ -412,57 +412,103 @@ class VonageHelper {
    * サブスクライブ
    */
   subscribe(stream) {
-    return this.sessionObj.subscribe(stream, this.videoTagId, this.subscribeOpts, (error) => {
-      if (error) this.#errorLog("subscribe error", error);
-    })
-    // ブラウザの自動再生ポリシーのためにサブスクライバーのオーディオがブロックされたときにディスパッチ
-    .on("audioBlocked", (event) => {
-      this.#debugLog("subscribe audioBlocked:", event);
-    }, this)
-    // １秒間に60回(ブラウザによる)ディスパッチ
-    // 他人の音声レベルを示すための数値(0.0~1.0)を定期的に送信する
-    .on("audioLevelUpdated", (event) => {
-    }, this)
-    // ブラウザの自動再生ポリシーのために一時停止した後、サブスクライバーのオーディオのブロックが解除されたときにディスパッチ
-    .on("audioUnblocked", (event) => {
-      this.#debugLog("subscribe audioUnblocked:", event);
-    }, this)
-    // サブスクライバーが'disconnect'イベントをディスパッチした後、サブスクライバーのストリームが再開されたときにディスパッチ
-    .on("connected", (event) => {
-      this.#debugLog("subscribe connected:", event);
-    }, this)
-    // サブスクライバー要素がHTMLDOMから削除されたときにディスパッチ
-    .on("destroyed", (event) => {
-      this.#debugLog("subscribe destroyed:", event);
-    }, this)
-    // サブスクライバーのストリームが中断されたときにディスパッチ
-    .on("disconnected", (event) => {
-      this.#debugLog("subscribe disconnected:", event);
-    }, this)
-    // ビデオのビデオサイズが変更されたときにディスパッチ
-    .on("videoDimensionsChanged", (event) => {
-      this.#debugLog("subscribe videoDimensionsChanged:", event);
-    }, this)
-    // サブスクライバーのビデオが無効になっている場合にディスパッチ
-    .on("videoDisabled", (event) => {
-      this.#debugLog("subscribe videoDisabled:", event);
-    }, this)
-    // ストリーム品質が低下したと判断した場合にディスパッチ
-    .on("videoDisableWarning", (event) => {
-      this.#debugLog("subscribe videoDisableWarning:", event);
-    }, this)
-    // ビデオが無効になっている状態から、ストリーム品質が向上したと判断した場合にディスパッチ
-    .on("videoDisableWarningLifted", (event) => {
-      this.#debugLog("subscribe videoDisableWarningLifted:", event);
-    }, this)
-    // サブスクライバーのビデオ要素が作成されたときにディスパッチ
-    .on("videoElementCreated", (event) => {
-      this.#debugLog("subscribe videoElementCreated:", event);
-    }, this)
-    // ビデオが以前に無効にされた後、サブスクライバーへのビデオの送信を再開したときにディスパッチ
-    .on("videoEnabled", (event) => {
-      this.#debugLog("subscribe videoEnabled:", event);
-    }, this);
+    return (
+      this.sessionObj
+        .subscribe(stream, this.videoTagId, this.subscribeOpts, (error) => {
+          if (error) this.#errorLog("subscribe error", error);
+        })
+        // ブラウザの自動再生ポリシーのためにサブスクライバーのオーディオがブロックされたときにディスパッチ
+        .on(
+          "audioBlocked",
+          (event) => {
+            this.#debugLog("subscribe audioBlocked:", event);
+          },
+          this
+        )
+        // １秒間に60回(ブラウザによる)ディスパッチ
+        // 他人の音声レベルを示すための数値(0.0~1.0)を定期的に送信する
+        .on("audioLevelUpdated", (event) => {}, this)
+        // ブラウザの自動再生ポリシーのために一時停止した後、サブスクライバーのオーディオのブロックが解除されたときにディスパッチ
+        .on(
+          "audioUnblocked",
+          (event) => {
+            this.#debugLog("subscribe audioUnblocked:", event);
+          },
+          this
+        )
+        // サブスクライバーが'disconnect'イベントをディスパッチした後、サブスクライバーのストリームが再開されたときにディスパッチ
+        .on(
+          "connected",
+          (event) => {
+            this.#debugLog("subscribe connected:", event);
+          },
+          this
+        )
+        // サブスクライバー要素がHTMLDOMから削除されたときにディスパッチ
+        .on(
+          "destroyed",
+          (event) => {
+            this.#debugLog("subscribe destroyed:", event);
+          },
+          this
+        )
+        // サブスクライバーのストリームが中断されたときにディスパッチ
+        .on(
+          "disconnected",
+          (event) => {
+            this.#debugLog("subscribe disconnected:", event);
+          },
+          this
+        )
+        // ビデオのビデオサイズが変更されたときにディスパッチ
+        .on(
+          "videoDimensionsChanged",
+          (event) => {
+            this.#debugLog("subscribe videoDimensionsChanged:", event);
+          },
+          this
+        )
+        // サブスクライバーのビデオが無効になっている場合にディスパッチ
+        .on(
+          "videoDisabled",
+          (event) => {
+            this.#debugLog("subscribe videoDisabled:", event);
+          },
+          this
+        )
+        // ストリーム品質が低下したと判断した場合にディスパッチ
+        .on(
+          "videoDisableWarning",
+          (event) => {
+            this.#debugLog("subscribe videoDisableWarning:", event);
+          },
+          this
+        )
+        // ビデオが無効になっている状態から、ストリーム品質が向上したと判断した場合にディスパッチ
+        .on(
+          "videoDisableWarningLifted",
+          (event) => {
+            this.#debugLog("subscribe videoDisableWarningLifted:", event);
+          },
+          this
+        )
+        // サブスクライバーのビデオ要素が作成されたときにディスパッチ
+        .on(
+          "videoElementCreated",
+          (event) => {
+            this.#debugLog("subscribe videoElementCreated:", event);
+          },
+          this
+        )
+        // ビデオが以前に無効にされた後、サブスクライバーへのビデオの送信を再開したときにディスパッチ
+        .on(
+          "videoEnabled",
+          (event) => {
+            this.#debugLog("subscribe videoEnabled:", event);
+          },
+          this
+        )
+    );
   }
 
   /**
@@ -577,7 +623,7 @@ class VonageHelper {
       return;
     }
 
-    if(this.isScreenShared) this.stopScreenShare();
+    if (this.isScreenShared) this.stopScreenShare();
 
     this.screenPublisherObj = OT.initPublisher(
       this.videoTagId,
