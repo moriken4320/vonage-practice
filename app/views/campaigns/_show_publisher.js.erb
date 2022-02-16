@@ -11,6 +11,9 @@ const webrtc = new Vue({
         connectButtonText() {
             return this.vonageHelper.isConnected ? 'dis connect' : 'connect'
         },
+        publishButtonText() {
+            return this.vonageHelper.isPublished ? 'stop publish' : 'start publish'
+        },
         audioButtonText() {
             return this.vonageHelper.enableAudio ? 'stop audio' : 'start audio'
         },
@@ -59,6 +62,9 @@ const webrtc = new Vue({
             await this.vonageHelper.deviceUpdated();
             }, 100);
             this.isVerified = true;
+        },
+        publish() {
+            this.vonageHelper.isPublished ? this.vonageHelper.unPublish() : this.vonageHelper.publish()
         },
         sendSignal() {
             if (this.signalText === '') return;

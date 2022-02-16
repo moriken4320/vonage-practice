@@ -243,8 +243,11 @@ class VonageHelper {
           function (event) {
             this.#debugLog("session streamCreated:", event);
             const videoType = event.stream.videoType;
-            if(videoType === "screen") this.stopScreenShare();
-            this.subscribeObjs.push({videoType: event.stream.videoType, subscribe: this.subscribe(event.stream)});
+            if(videoType === "screen") {
+              this.stopScreenShare();
+            } else {
+              this.subscribeObjs.push(this.subscribe(event.stream));
+            }
           },
           this
         )
@@ -253,6 +256,10 @@ class VonageHelper {
           "streamDestroyed",
           function (event) {
             this.#debugLog("session streamDestroyed:", event);
+            const streamId = event.stream.id;
+            this.subscribeObjs = this.subscribeObjs.filter((subscriber) => {
+              return subscriber.stream.id !== streamId;
+            });
           },
           this
         )
@@ -279,8 +286,6 @@ class VonageHelper {
       this.sessionObj.connect(this.token, (error) => {
         if (error) {
           this.#errorLog("session connect error:", error);
-        } else {
-          this.publish();
         }
       });
     }
