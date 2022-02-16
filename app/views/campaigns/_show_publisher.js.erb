@@ -64,7 +64,7 @@ const webrtc = new Vue({
     methods: {
         authRequest() {
             if (this.userName === '') return;
-            this.setToken();
+            this.token = this.getToken();
         },
         init() {
             if (!this.vonageHelper) return;
@@ -90,11 +90,7 @@ const webrtc = new Vue({
             this.signalText.type = '';
             this.signalText.data = '';
         },
-        changeName() {
-            this.userName = this.vonageHelper.userName;
-            this.setToken();
-        },
-        setToken() {
+        getToken() {
             window.axios.get(`/campaigns/${'<%= @campaign.id %>'}/generate_publisher_token`, {
                 params: {
                     session_id: '<%= @campaign.session_id %>',
@@ -102,8 +98,12 @@ const webrtc = new Vue({
                 },
             })
             .then((response) => {
-                this.token = response.data;
+                return response.data;
             });
+        },
+        changeName() {
+            this.userName = this.vonageHelper.userName;
+            this.token = this.getToken();
         },
     },
 });

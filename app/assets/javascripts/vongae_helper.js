@@ -230,7 +230,11 @@ class VonageHelper {
           "signal",
           function (event) {
             this.#debugLog("session signal:", event);
-            this.signalObj.push({type: event.type, data: event.data, from: event.from});
+            this.signalObj.push({
+              type: event.type,
+              data: event.data,
+              from: event.from,
+            });
             if (event.type === "signal:changeName") {
               if (this.events.changeName) {
                 this.sessionDisconnect();
@@ -250,7 +254,7 @@ class VonageHelper {
             this.#debugLog("session streamCreated:", event);
             const videoType = event.stream.videoType;
             const subscribe = this.subscribe(event.stream);
-            if(videoType === "screen") {
+            if (videoType === "screen") {
               this.stopScreenShare();
               this.subscribeScreenObjs = subscribe;
             } else {
@@ -265,7 +269,7 @@ class VonageHelper {
           function (event) {
             this.#debugLog("session streamDestroyed:", event);
             const videoType = event.stream.videoType;
-            if(videoType === "screen") {
+            if (videoType === "screen") {
               this.subscribeScreenObjs = null;
             } else {
               const streamId = event.stream.id;
@@ -327,12 +331,11 @@ class VonageHelper {
       data: data,
     };
     if (to) option.to = to;
-    this.sessionObj.signal(option,
-    (error) => {
+    this.sessionObj.signal(option, (error) => {
       if (error) {
         this.#errorLog("signal error", error);
       } else {
-        this.#debugLog("signal sent", {type: type, data: data});
+        this.#debugLog("signal sent", { type: type, data: data });
       }
     });
   }
@@ -358,84 +361,84 @@ class VonageHelper {
           resolve();
         }
       )
-      // カメラとマイクへのアクセスを許可したときにディスパッチ
-      .on(
-        "accessAllowed",
-        function (event) {
-          this.#debugLog("initPublisher accessAllowed:", event);
-          this.deviceUpdated();
-        },
-        this
-      )
-      // カメラとマイクへのアクセスを許可しなかったときにディスパッチ
-      .on(
-        "accessDenied",
-        function (event) {
-          this.#debugLog("initPublisher accessDenied:", event);
-        },
-        this
-      )
-      // カメラとマイクへのアクセスを許可するためのダイアログを閉じたときにディスパッチ
-      .on(
-        "accessDialogClosed",
-        function (event) {
-          this.#debugLog("initPublisher accessDialogClosed:", event);
-        },
-        this
-      )
-      // カメラとマイクへのアクセスを許可するためのダイアログが開かれたときにディスパッチ
-      .on(
-        "accessDialogOpened",
-        function (event) {
-          this.#debugLog("initPublisher accessDialogOpened:", event);
-        },
-        this
-      )
-      // １秒間に60回(ブラウザによる)ディスパッチ
-      // 自分の音声レベルを示すための数値(0.0~1.0)を定期的に送信する
-      .on(
-        "audioLevelUpdated",
-        function (event) {
-          this.audioLevel = event.audioLevel;
-        },
-        this
-      )
-      // Publisher要素がHTMLDOMから削除されたときにディスパッチ
-      .on(
-        "destroyed",
-        function (event) {
-          this.#debugLog("initPublisher destroyed:", event);
-        },
-        this
-      )
-      // モデレーターが自分の音声の強制的にミュートしたときにディスパッチ
-      .on(
-        "muteForced",
-        function (event) {
-          this.#debugLog("initPublisher muteForced:", event);
-        },
-        this
-      )
-      // セッションへの公開を開始したときにディスパッチ
-      .on(
-        "streamCreated",
-        function (event) {
-          this.#debugLog("initPublisher streamCreated:", event);
-          this.isPublished = true;
-        },
-        this
-      )
-      // セッションへの公開を停止したときにディスパッチ
-      .on(
-        "streamDestroyed",
-        function (event) {
-          event.preventDefault();
-          this.#debugLog("initPublisher streamDestroyed:", event);
-          this.isPublished = false;
-          this.stopScreenShare();
-        },
-        this
-      );
+        // カメラとマイクへのアクセスを許可したときにディスパッチ
+        .on(
+          "accessAllowed",
+          function (event) {
+            this.#debugLog("initPublisher accessAllowed:", event);
+            this.deviceUpdated();
+          },
+          this
+        )
+        // カメラとマイクへのアクセスを許可しなかったときにディスパッチ
+        .on(
+          "accessDenied",
+          function (event) {
+            this.#debugLog("initPublisher accessDenied:", event);
+          },
+          this
+        )
+        // カメラとマイクへのアクセスを許可するためのダイアログを閉じたときにディスパッチ
+        .on(
+          "accessDialogClosed",
+          function (event) {
+            this.#debugLog("initPublisher accessDialogClosed:", event);
+          },
+          this
+        )
+        // カメラとマイクへのアクセスを許可するためのダイアログが開かれたときにディスパッチ
+        .on(
+          "accessDialogOpened",
+          function (event) {
+            this.#debugLog("initPublisher accessDialogOpened:", event);
+          },
+          this
+        )
+        // １秒間に60回(ブラウザによる)ディスパッチ
+        // 自分の音声レベルを示すための数値(0.0~1.0)を定期的に送信する
+        .on(
+          "audioLevelUpdated",
+          function (event) {
+            this.audioLevel = event.audioLevel;
+          },
+          this
+        )
+        // Publisher要素がHTMLDOMから削除されたときにディスパッチ
+        .on(
+          "destroyed",
+          function (event) {
+            this.#debugLog("initPublisher destroyed:", event);
+          },
+          this
+        )
+        // モデレーターが自分の音声の強制的にミュートしたときにディスパッチ
+        .on(
+          "muteForced",
+          function (event) {
+            this.#debugLog("initPublisher muteForced:", event);
+          },
+          this
+        )
+        // セッションへの公開を開始したときにディスパッチ
+        .on(
+          "streamCreated",
+          function (event) {
+            this.#debugLog("initPublisher streamCreated:", event);
+            this.isPublished = true;
+          },
+          this
+        )
+        // セッションへの公開を停止したときにディスパッチ
+        .on(
+          "streamDestroyed",
+          function (event) {
+            event.preventDefault();
+            this.#debugLog("initPublisher streamDestroyed:", event);
+            this.isPublished = false;
+            this.stopScreenShare();
+          },
+          this
+        );
     });
   }
 
@@ -638,7 +641,7 @@ class VonageHelper {
     this.selectedAudioDeviceId = audioDeviceId;
     this.publisherObj.setAudioSource(this.selectedAudioDeviceId);
     this.#debugLog("setAudioSource:", this.selectedAudioDeviceId);
-    $.extend(this.videoOpts, {audioSource: this.selectedAudioDeviceId});
+    $.extend(this.videoOpts, { audioSource: this.selectedAudioDeviceId });
   }
 
   /**
@@ -649,7 +652,7 @@ class VonageHelper {
     this.selectedVideoDeviceId = videoDeviceId;
     this.publisherObj.setVideoSource(this.selectedVideoDeviceId);
     this.#debugLog("setVideoSource:", this.selectedVideoDeviceId);
-    $.extend(this.videoOpts, {videoSource: this.selectedVideoDeviceId});
+    $.extend(this.videoOpts, { videoSource: this.selectedVideoDeviceId });
   }
 
   /**
@@ -687,7 +690,9 @@ class VonageHelper {
       return;
     }
 
-    if (this.subscribeObjs.some((subscribe) => subscribe.videoType === "screen")) {
+    if (
+      this.subscribeObjs.some((subscribe) => subscribe.videoType === "screen")
+    ) {
       this.#errorLog("other user already share screen");
       return;
     }
