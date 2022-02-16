@@ -7,6 +7,7 @@ const webrtc = new Vue({
             type: '',
             data: '',
         },
+        signalTarget: null,
     },
     computed: {
         connectButtonText() {
@@ -36,7 +37,6 @@ const webrtc = new Vue({
             '<%= @opentok_info[:api_key] %>',
             '<%= @campaign.session_id %>',
             '<%= @opentok_info[:token] %>',
-            {name: 'host-name'},
         );
     },
     mounted() {
@@ -60,7 +60,7 @@ const webrtc = new Vue({
         },
         sendSignal() {
             if (this.signalText.type === '' || this.signalText.data === '') return;
-            this.vonageHelper.sendSignal(this.signalText.type, this.signalText.data);
+            this.vonageHelper.sendSignal(this.signalText.type, this.signalText.data, this.signalTarget);
             this.signalText.type = '';
             this.signalText.data = '';
         },

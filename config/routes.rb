@@ -7,6 +7,7 @@ Rails.application.routes.draw do
       get :show_moderator
       get :show_publisher
       get :show_subscriber
+      get :generate_publisher_token
     end
   end
 end

@@ -1,5 +1,5 @@
 class VonageHelper {
-  constructor(campaignId, apiKey, sessionId, token, user, events = {}) {
+  constructor(campaignId, apiKey, sessionId, token, events = {}) {
     this.campaignId = campaignId;
     this.apiKey = apiKey;
     this.sessionId = sessionId;
@@ -8,9 +8,7 @@ class VonageHelper {
     this.videoTagId = "videos";
     this.audioOffImage = null;
     this.videoOffImage = null;
-
-    // ユーザー情報
-    this.user = user;
+    this.userName = "";
 
     // デバイス系
     this.audioDeviceList = [];
@@ -44,7 +42,6 @@ class VonageHelper {
         buttonDisplayMode: "off",
         nameDisplayMode: "on",
       },
-      name: this.user.name,
     };
     this.screenPublisherObj = null;
     this.screenOpts = {
@@ -60,7 +57,6 @@ class VonageHelper {
         buttonDisplayMode: "off",
         nameDisplayMode: "on",
       },
-      name: `${this.user.name}の画面共有`,
       videoContentHint: "detail",
     };
     this.subscribeObjs = [];
@@ -91,8 +87,8 @@ class VonageHelper {
    */
   async initForModerator() {
     this.initOT();
-    await this.initPublisher();
     this.initSession();
+    this.sessionConnect();
   }
 
   /**
@@ -101,6 +97,7 @@ class VonageHelper {
   async initForPublisher() {
     this.initOT();
     this.initSession();
+    this.sessionConnect();
   }
 
   /**
@@ -138,9 +135,9 @@ class VonageHelper {
    * @param {string} name
    */
   setName(name) {
-    this.user.name = name;
-    this.videoOpts.name = this.user.name;
-    this.screenOpts.name = `${this.user.name}の画面共有`;
+    this.userName = name;
+    this.videoOpts.name = this.userName;
+    this.screenOpts.name = `${this.userName}の画面共有`;
   }
 
   /**
@@ -196,6 +193,9 @@ class VonageHelper {
           function (event) {
             this.#debugLog("session sessionConnected:", event);
             this.isConnected = true;
+            const userName = event.target.connection.data;
+            this.setName(userName);
+            this.initPublisher();
           },
           this
         )
@@ -231,6 +231,14 @@ class VonageHelper {
           function (event) {
             this.#debugLog("session signal:", event);
             this.signalObj.push({type: event.type, data: event.data, from: event.from});
+            if (event.type === "signal:changeName") {
+              if (this.events) {
+                this.sessionDisconnect();
+                this.setName(event.data);
+                this.events.changeName();
+                this.initForPublisher();
+              }
+            }
           },
           this
         )

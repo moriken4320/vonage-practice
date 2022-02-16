@@ -3,7 +3,7 @@
 <p>セッションID：<%= @campaign.session_id %></p>
 
 <div id="publisher-wrapper">
-    <div v-show="isVerified" id="video-wrapper">
+    <div v-if="isVerified" id="video-wrapper">
         <div id="videos"></div>
         <div id="user-interface">
             <div>
@@ -46,7 +46,7 @@
         </div>
     </div>
 
-    <div v-show="!isVerified" id="auth-wrapper">
+    <div v-else id="auth-wrapper">
         <input type="text" id="user-name" v-model="userName" placeholder="名前を入力">
         <button @click="authRequest">入室リクエストを送信</button>
     </div>

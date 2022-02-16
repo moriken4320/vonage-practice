@@ -12,16 +12,16 @@ const webrtc = new Vue({
     },
     computed: {
         connectButtonText() {
-            return this.vonageHelper.isConnected ? 'dis connect' : 'connect'
+            return this.vonageHelper?.isConnected ? 'dis connect' : 'connect'
         },
         publishButtonText() {
-            return this.vonageHelper.isPublished ? 'stop publish' : 'start publish'
+            return this.vonageHelper?.isPublished ? 'stop publish' : 'start publish'
         },
         audioButtonText() {
-            return this.vonageHelper.enableAudio ? 'stop audio' : 'start audio'
+            return this.vonageHelper?.enableAudio ? 'stop audio' : 'start audio'
         },
         videoButtonText() {
-            return this.vonageHelper.enableVideo ? 'stop video' : 'start video'
+            return this.vonageHelper?.enableVideo ? 'stop video' : 'start video'
         },
     },
     watch: {
@@ -31,38 +31,56 @@ const webrtc = new Vue({
             },
             deep: true
         },
+        isVerified: function(newValue) {
+            if (newValue === true) {
+                this.init();
+            }
+        },
     },
     created() {
-        this.vonageHelper = new VonageHelper(
-            '<%= @campaign.id %>',
-            '<%= @opentok_info[:api_key] %>',
-            '<%= @campaign.session_id %>',
-            '<%= @opentok_info[:token] %>',
-            {name: 'publisher-name'},
-            {changeStreamName: this.changeStreamName},
-        );
+
     },
     mounted() {
-        this.vonageHelper.initForPublisher();
-        // オーディオレベルを取得
-        setInterval(() => {
-            $("#audio-level > div").width(`${this.vonageHelper.audioLevel * 100}%`);
-        }, 100);
 
-        // デバイスソース変更時イベント
-        navigator.mediaDevices.ondevicechange = async (event) => {
-            await this.vonageHelper.deviceUpdated();
-        }
     },
     methods: {
-        connect() {
-            this.vonageHelper.isConnected ? this.vonageHelper.sessionDisconnect() : this.vonageHelper.sessionConnect()
-        },
         authRequest() {
             if (this.userName === '') return;
-            this.vonageHelper.setName(this.userName);
-            this.vonageHelper.initPublisher();
-            this.isVerified = true;
+            window.axios.get(`/campaigns/${'<%= @campaign.id %>'}/generate_publisher_token`, {
+                params: {
+                    session_id: '<%= @campaign.session_id %>',
+                    role: "publisher",
+                    data: this.userName,
+                },
+            })
+            .then((response) => {
+                const token = response.data;
+                this.vonageHelper = new VonageHelper(
+                    '<%= @campaign.id %>',
+                    '<%= @opentok_info[:api_key] %>',
+                    '<%= @campaign.session_id %>',
+                    token,
+                    {changeName: this.changeName},
+                );
+                ///////
+                this.isVerified = true;
+                ///////
+            });
+        },
+        init() {
+            if (!this.vonageHelper) return;
+            this.vonageHelper.initForPublisher();
+            // オーディオレベルを取得
+            setInterval(() => {
+                $("#audio-level > div").width(`${this.vonageHelper.audioLevel * 100}%`);
+            }, 100);
+            // デバイスソース変更時イベント
+            navigator.mediaDevices.ondevicechange = async (event) => {
+                await this.vonageHelper.deviceUpdated();
+            }
+        },
+        connect() {
+            this.vonageHelper.isConnected ? this.vonageHelper.sessionDisconnect() : this.vonageHelper.sessionConnect()
         },
         publish() {
             this.vonageHelper.isPublished ? this.vonageHelper.unPublish() : this.vonageHelper.publish()
@@ -73,10 +91,10 @@ const webrtc = new Vue({
             this.signalText.type = '';
             this.signalText.data = '';
         },
-        async changeStreamName() {
-            const isPublished = this.vonageHelper.isPublished;
-            await this.vonageHelper.initPublisher();
-            isPublished ? this.vonageHelper.publish() : null
+        changeName() {
+            this.userName = this.vonageHelper.userName;
+            this.authRequest();
+            //this.init();
         },
     },
 });

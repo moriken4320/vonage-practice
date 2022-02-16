@@ -12,7 +12,6 @@
                 <button @click="vonageHelper.setAudioEnabled(!vonageHelper.enableAudio)">{{ audioButtonText }}</button>
                 <button @click="vonageHelper.setVideoEnabled(!vonageHelper.enableVideo)">{{ videoButtonText }}</button>
                 <button @click="vonageHelper.startScreenShare()" v-if="vonageHelper.isPublished">screen share</button>
-                <button @click="changeStreamName">change name</button>
             </div>
             <div>
                 <select @change="vonageHelper.setAudioSource(event.target.value)">
@@ -39,11 +38,20 @@
         <div id="panelist-area" v-if="vonageHelper.isConnected">
             <div style="font-weight: bold;">パネリスト</div>
             <div v-for="subscriber in vonageHelper.subscribeObjs">
-                id: {{ subscriber.stream.connection.id }} , name: {{ subscriber.stream.name }}
+                <label>
+                    <input type="radio" name="signal_target" :value="subscriber.stream.connection" v-model="signalTarget">
+                    <span>id: {{ subscriber.stream.connection.id }} , name: {{ subscriber.stream.connection.data }}</span>
+                </label>
             </div>
         </div>
         <div id="message-area" v-if="vonageHelper.isConnected">
-            <div style="font-weight: bold;">シグナル</div>
+            <div>
+                <span style="font-weight: bold;">シグナル</span>
+                <label>
+                    <input type="radio" name="signal_target" :value="null" v-model="signalTarget">
+                    <span>not signal target</span>
+                </label>
+            </div>
             <div>
                 <input type="text" placeholder="type" v-model="signalText['type']">
                 <input type="text" placeholder="data" v-model="signalText['data']">

@@ -31,7 +31,7 @@ class CampaignsController < ApplicationController
         # トークン発行
         if @campaign.present? && @campaign.session_id.present?
             @opentok_info = VonageService.generate_access_token(
-                { role: :moderator, data: :moderator },
+                { role: :moderator, data: "ホスト" },
                 @campaign.session_id
             )
         end
@@ -41,7 +41,7 @@ class CampaignsController < ApplicationController
         # トークン発行
         if @campaign.present? && @campaign.session_id.present?
             @opentok_info = VonageService.generate_access_token(
-                { role: :publisher, data: :publisher },
+                { role: :publisher, data: request.user_agent },
                 @campaign.session_id
             )
         end
@@ -51,10 +51,18 @@ class CampaignsController < ApplicationController
         # トークン発行
         if @campaign.present? && @campaign.session_id.present?
             @opentok_info = VonageService.generate_access_token(
-                { role: :subscriber, data: :subscriber },
+                { role: :subscriber, data: "視聴者" },
                 @campaign.session_id
             )
         end
+    end
+
+    def generate_publisher_token
+        opentok_info = VonageService.generate_access_token(
+            { role: :publisher, data: params[:data] },
+            params[:session_id]
+        )
+        render json: opentok_info[:token]
     end
 
     private
