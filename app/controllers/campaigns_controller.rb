@@ -1,5 +1,5 @@
 class CampaignsController < ApplicationController
-    before_action :authenticate_admin!, except: [:index]
+    before_action :authenticate_admin!, only: [:show_moderator]
     before_action :get_campaign, only: [:show, :show_moderator, :show_publisher, :show_subscriber]
     def test
 

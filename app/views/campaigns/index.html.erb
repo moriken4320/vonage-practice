@@ -1,5 +1,10 @@
-<%= link_to "サインアップ", new_admin_registration_path %>
-<%= link_to "ログイン", new_admin_session_path %>
+<% if admin_signed_in? %>
+    <%= link_to "ログアウト", destroy_admin_session_path, method: :delete %>
+<% elsif %>
+    <%= link_to "サインアップ", new_admin_registration_path %>
+    <%= link_to "ログイン", new_admin_session_path %>
+<% end %>
+
 
 <p>キャンペーン一覧</p>
 <%= link_to "作成", new_campaign_path %>
