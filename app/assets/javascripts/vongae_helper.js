@@ -77,7 +77,6 @@ class VonageHelper {
         nameDisplayMode: "on",
         videoDisabledDisplayMode: "on",
       },
-      testNetwork: true,
     };
 
     this.audioLevel = 0;
@@ -89,12 +88,9 @@ class VonageHelper {
   /**
    * moderator用init処理
    */
-  initForModerator() {
+  async initForModerator() {
     this.initOT();
-    this.initPublisher();
-    setTimeout(async () => {
-      await this.deviceUpdated();
-    }, 100);
+    await this.initPublisher();
     this.initSession();
   }
 
@@ -243,10 +239,11 @@ class VonageHelper {
           function (event) {
             this.#debugLog("session streamCreated:", event);
             const videoType = event.stream.videoType;
+            const subscribe = this.subscribe(event.stream);
             if(videoType === "screen") {
               this.stopScreenShare();
             } else {
-              this.subscribeObjs.push(this.subscribe(event.stream));
+              this.subscribeObjs.push(subscribe);
             }
           },
           this
@@ -322,29 +319,30 @@ class VonageHelper {
   /**
    * publisher作成処理
    */
-  initPublisher() {
-    this.publisherObj = OT.initPublisher(
-      this.videoTagId,
-      this.videoOpts,
-      (error) => {
-        if (error) {
-          this.#errorLog("initPublisher error:", error);
-          if (this.publisherObj) this.publisherObj.destroy();
-          this.publisherObj = null;
-        } else {
-          this.#debugLog("initPublisher success:");
-          // this.createRemoteAudioOffIcon();
+  async initPublisher() {
+    return new Promise((resolve) => {
+      if (this.publisherObj) this.publisherObj.destroy();
+      this.publisherObj = OT.initPublisher(
+        this.videoTagId,
+        this.videoOpts,
+        (error) => {
+          if (error) {
+            this.#errorLog("initPublisher error:", error);
+            if (this.publisherObj) this.publisherObj.destroy();
+            this.publisherObj = null;
+          } else {
+            this.#debugLog("initPublisher success:");
+            // this.createRemoteAudioOffIcon();
+          }
+          resolve();
         }
-      }
-    )
+      )
       // カメラとマイクへのアクセスを許可したときにディスパッチ
       .on(
         "accessAllowed",
         function (event) {
           this.#debugLog("initPublisher accessAllowed:", event);
-          setTimeout(async () => {
-            await this.deviceUpdated();
-          }, 100);
+          this.deviceUpdated();
         },
         this
       )
@@ -402,6 +400,7 @@ class VonageHelper {
         "streamCreated",
         function (event) {
           this.#debugLog("initPublisher streamCreated:", event);
+          this.isPublished = true;
         },
         this
       )
@@ -411,9 +410,12 @@ class VonageHelper {
         function (event) {
           event.preventDefault();
           this.#debugLog("initPublisher streamDestroyed:", event);
+          this.isPublished = false;
+          this.stopScreenShare();
         },
         this
       );
+    });
   }
 
   /**
@@ -427,7 +429,6 @@ class VonageHelper {
           this.#errorLog("publish error:", error);
         } else {
           this.#debugLog("publish success:");
-          this.isPublished = true;
         }
       });
     }
@@ -441,7 +442,6 @@ class VonageHelper {
     if (this.sessionObj && this.publisherObj) {
       this.sessionObj.unpublish(this.publisherObj);
       this.#debugLog("unpublish success:");
-      this.isPublished = false;
     }
   }
 
@@ -595,6 +595,8 @@ class VonageHelper {
       )
     ) {
       this.setAudioSource(this.audioDeviceList[0].deviceId);
+    } else {
+      this.setAudioSource(this.selectedAudioDeviceId);
     }
     if (
       !this.videoDeviceList.some(
@@ -602,6 +604,8 @@ class VonageHelper {
       )
     ) {
       this.setVideoSource(this.videoDeviceList[0].deviceId);
+    } else {
+      this.setVideoSource(this.selectedVideoDeviceId);
     }
   }
 
@@ -613,6 +617,7 @@ class VonageHelper {
     this.selectedAudioDeviceId = audioDeviceId;
     this.publisherObj.setAudioSource(this.selectedAudioDeviceId);
     this.#debugLog("setAudioSource:", this.selectedAudioDeviceId);
+    $.extend(this.videoOpts, {audioSource: this.selectedAudioDeviceId});
   }
 
   /**
@@ -623,6 +628,7 @@ class VonageHelper {
     this.selectedVideoDeviceId = videoDeviceId;
     this.publisherObj.setVideoSource(this.selectedVideoDeviceId);
     this.#debugLog("setVideoSource:", this.selectedVideoDeviceId);
+    $.extend(this.videoOpts, {videoSource: this.selectedVideoDeviceId});
   }
 
   /**

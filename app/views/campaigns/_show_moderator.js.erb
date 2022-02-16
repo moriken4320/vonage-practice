@@ -60,5 +60,11 @@ const webrtc = new Vue({
             this.vonageHelper.sendSignal('chat', this.signalText);
             this.signalText = '';
         },
+        async changeStreamName() {
+            const isPublished = this.vonageHelper.isPublished;
+            this.vonageHelper.setName("test-name");
+            await this.vonageHelper.initPublisher();
+            isPublished ? this.vonageHelper.publish() : null
+        },
     },
 });

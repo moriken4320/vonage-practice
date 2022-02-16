@@ -58,9 +58,6 @@ const webrtc = new Vue({
             if (this.userName === '') return;
             this.vonageHelper.setName(this.userName);
             this.vonageHelper.initPublisher();
-            setTimeout(async () => {
-            await this.vonageHelper.deviceUpdated();
-            }, 100);
             this.isVerified = true;
         },
         publish() {
