@@ -18,3 +18,4 @@
 //= require jquery_ujs
 //= require vue/dist/vue.min
 //= require @opentok/client/dist/js/opentok.min
+//= require axios/dist/axios.min.js
