@@ -38,12 +38,15 @@
         </div>
         <div id="panelist-area" v-if="vonageHelper.isConnected">
             <div style="font-weight: bold;">パネリスト</div>
-            <div v-for="subscriber in vonageHelper.subscribeObjs">name: {{ subscriber.stream.name }}</div>
+            <div v-for="subscriber in vonageHelper.subscribeObjs">
+                id: {{ subscriber.stream.connection.id }} , name: {{ subscriber.stream.name }}
+            </div>
         </div>
         <div id="message-area" v-if="vonageHelper.isConnected">
             <div style="font-weight: bold;">シグナル</div>
             <div>
-                <input type="text" v-model="signalText">
+                <input type="text" placeholder="type" v-model="signalText['type']">
+                <input type="text" placeholder="data" v-model="signalText['data']">
                 <button @click="sendSignal">送信</button>
             </div>
             <div v-for="signal in vonageHelper.signalObj">type: {{ signal.type }}, data: {{ signal.data }}</div>

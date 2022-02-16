@@ -1,13 +1,47 @@
-const vonageHelper = new VonageHelper(
-    '<%= @campaign.id %>',
-    '<%= @opentok_info[:api_key] %>',
-    '<%= @campaign.session_id %>',
-    '<%= @opentok_info[:token] %>',
-);
-console.log(vonageHelper);
-vonageHelper.initForSubscriber();
-
-// デバイスソース変更時イベント
-navigator.mediaDevices.ondevicechange = async function(event) {
-    vonageHelper.deviceUpdated();
-}
+const webrtc = new Vue({
+    el: "#subscriber-wrapper",
+    data: {
+        vonageHelper: null,
+        userName: '',
+        signalText: {
+            type: '',
+            data: '',
+        },
+    },
+    computed: {
+        connectButtonText() {
+            return this.vonageHelper.isConnected ? 'dis connect' : 'connect'
+        },
+    },
+    watch: {
+        vonageHelper: {
+            handler: function(newValue) {
+                //console.log(newValue);
+            },
+            deep: true
+        },
+    },
+    created() {
+        this.vonageHelper = new VonageHelper(
+            '<%= @campaign.id %>',
+            '<%= @opentok_info[:api_key] %>',
+            '<%= @campaign.session_id %>',
+            '<%= @opentok_info[:token] %>',
+            {name: 'subscribe-name'},
+        );
+    },
+    mounted() {
+        this.vonageHelper.initForSubscriber();
+    },
+    methods: {
+        connect() {
+            this.vonageHelper.isConnected ? this.vonageHelper.sessionDisconnect() : this.vonageHelper.sessionConnect()
+        },
+        sendSignal() {
+            if (this.signalText.type === '' || this.signalText.data === '') return;
+            this.vonageHelper.sendSignal(this.signalText.type, this.signalText.data);
+            this.signalText.type = '';
+            this.signalText.data = '';
+        },
+    },
+});

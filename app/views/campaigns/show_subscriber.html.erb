@@ -2,7 +2,25 @@
 <p>タイトル：<%= @campaign.title %></p>
 <p>セッションID：<%= @campaign.session_id %></p>
 
-<div id="localVideo"></div>
+<div id="subscriber-wrapper">
+    <div id="video-wrapper">
+        <div id="videos"></div>
+        <div id="user-interface">
+            <div>
+                <button @click="connect">{{ connectButtonText }}</button>
+            </div>
+        </div>
+        <div id="message-area" v-if="vonageHelper.isConnected">
+            <div style="font-weight: bold;">シグナル</div>
+            <div>
+                <input type="text" placeholder="type" v-model="signalText['type']">
+                <input type="text" placeholder="data" v-model="signalText['data']">
+                <button @click="sendSignal">送信</button>
+            </div>
+            <div v-for="signal in vonageHelper.signalObj">type: {{ signal.type }}, data: {{ signal.data }}</div>
+        </div>
+    </div>
+</div>
 
 <script type="text/javascript">
     <%= render "show_subscriber.js" %>

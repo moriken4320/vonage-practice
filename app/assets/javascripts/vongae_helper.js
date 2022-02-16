@@ -64,6 +64,7 @@ class VonageHelper {
       videoContentHint: "detail",
     };
     this.subscribeObjs = [];
+    this.subscribeScreenObj = null;
     this.subscribeOpts = {
       fitMode: "contain",
       insertMode: "append",
@@ -242,6 +243,7 @@ class VonageHelper {
             const subscribe = this.subscribe(event.stream);
             if(videoType === "screen") {
               this.stopScreenShare();
+              this.subscribeScreenObjs = subscribe;
             } else {
               this.subscribeObjs.push(subscribe);
             }
@@ -253,10 +255,15 @@ class VonageHelper {
           "streamDestroyed",
           function (event) {
             this.#debugLog("session streamDestroyed:", event);
-            const streamId = event.stream.id;
-            this.subscribeObjs = this.subscribeObjs.filter((subscriber) => {
-              return subscriber.stream.id !== streamId;
-            });
+            const videoType = event.stream.videoType;
+            if(videoType === "screen") {
+              this.subscribeScreenObjs = null;
+            } else {
+              const streamId = event.stream.id;
+              this.subscribeObjs = this.subscribeObjs.filter((subscriber) => {
+                return subscriber.stream.id !== streamId;
+              });
+            }
           },
           this
         )
@@ -283,6 +290,8 @@ class VonageHelper {
       this.sessionObj.connect(this.token, (error) => {
         if (error) {
           this.#errorLog("session connect error:", error);
+        } else {
+          this.publish();
         }
       });
     }
@@ -299,14 +308,17 @@ class VonageHelper {
    * signal送信
    * @param {string} type
    * @param {string} data
+   * @param {Connection|null} to
    * @returns
    */
-  sendSignal(type, data) {
+  sendSignal(type, data, to = null) {
     if (!this.sessionObj) return;
-    this.sessionObj.signal({
+    const option = {
       type: type,
-      data: data
-    },
+      data: data,
+    };
+    if (to) option.to = to;
+    this.sessionObj.signal(option,
     (error) => {
       if (error) {
         this.#errorLog("signal error", error);

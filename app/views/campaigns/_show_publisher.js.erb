@@ -5,7 +5,10 @@ const webrtc = new Vue({
         userName: '',
         isVerified: false,
         audioLevel: 0,
-        signalText: '',
+        signalText: {
+            type: '',
+            data: '',
+        },
     },
     computed: {
         connectButtonText() {
@@ -36,6 +39,7 @@ const webrtc = new Vue({
             '<%= @campaign.session_id %>',
             '<%= @opentok_info[:token] %>',
             {name: 'publisher-name'},
+            {changeStreamName: this.changeStreamName},
         );
     },
     mounted() {
@@ -64,9 +68,15 @@ const webrtc = new Vue({
             this.vonageHelper.isPublished ? this.vonageHelper.unPublish() : this.vonageHelper.publish()
         },
         sendSignal() {
-            if (this.signalText === '') return;
-            this.vonageHelper.sendSignal('chat', this.signalText);
-            this.signalText = '';
+            if (this.signalText.type === '' || this.signalText.data === '') return;
+            this.vonageHelper.sendSignal(this.signalText.type, this.signalText.data);
+            this.signalText.type = '';
+            this.signalText.data = '';
+        },
+        async changeStreamName() {
+            const isPublished = this.vonageHelper.isPublished;
+            await this.vonageHelper.initPublisher();
+            isPublished ? this.vonageHelper.publish() : null
         },
     },
 });

@@ -3,7 +3,10 @@ const webrtc = new Vue({
     data: {
         vonageHelper: null,
         audioLevel: 0,
-        signalText: '',
+        signalText: {
+            type: '',
+            data: '',
+        },
     },
     computed: {
         connectButtonText() {
@@ -56,15 +59,10 @@ const webrtc = new Vue({
             this.vonageHelper.isPublished ? this.vonageHelper.unPublish() : this.vonageHelper.publish()
         },
         sendSignal() {
-            if (this.signalText === '') return;
-            this.vonageHelper.sendSignal('chat', this.signalText);
-            this.signalText = '';
-        },
-        async changeStreamName() {
-            const isPublished = this.vonageHelper.isPublished;
-            this.vonageHelper.setName("test-name");
-            await this.vonageHelper.initPublisher();
-            isPublished ? this.vonageHelper.publish() : null
+            if (this.signalText.type === '' || this.signalText.data === '') return;
+            this.vonageHelper.sendSignal(this.signalText.type, this.signalText.data);
+            this.signalText.type = '';
+            this.signalText.data = '';
         },
     },
 });
