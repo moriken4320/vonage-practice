@@ -232,11 +232,12 @@ class VonageHelper {
             this.#debugLog("session signal:", event);
             this.signalObj.push({type: event.type, data: event.data, from: event.from});
             if (event.type === "signal:changeName") {
-              if (this.events) {
+              if (this.events.changeName) {
                 this.sessionDisconnect();
                 this.setName(event.data);
-                this.events.changeName();
-                this.initForPublisher();
+                setTimeout(() => {
+                  this.events.changeName();
+                }, 1000);
               }
             }
           },
