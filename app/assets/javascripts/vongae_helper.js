@@ -97,6 +97,7 @@ class VonageHelper {
   async initForPublisher() {
     this.initOT();
     this.initSession();
+    this.registerSignalChangeNameEvent();
     this.sessionConnect();
   }
 
@@ -107,6 +108,36 @@ class VonageHelper {
     this.initOT();
     this.initSession();
   }
+
+  /**
+   * publisherロールのトークンを取得
+   * @param {string} url
+   * @param {string} userName
+   * @param {function} callback
+   */
+  getPublisherToken(url, userName, callback) {
+    window.axios.get(url, {
+      params: {
+          session_id: this.sessionId,
+          data: userName,
+      },
+    })
+    .then((response) => {
+        const token = response.data;
+        callback(token);
+    });
+  }
+
+  /**
+   * nameをセット
+   * @param {string} name
+   */
+  setName(name) {
+    this.userName = name;
+    this.videoOpts.name = this.userName;
+    this.screenOpts.name = `${this.userName}の画面共有`;
+  }
+
 
   /**
    * OTの初期設定
@@ -128,16 +159,6 @@ class VonageHelper {
         response.supported && response.extensionRegistered !== false;
     });
     this.isScreenSupported = isScreenSupported;
-  }
-
-  /**
-   * nameをセット
-   * @param {string} name
-   */
-  setName(name) {
-    this.userName = name;
-    this.videoOpts.name = this.userName;
-    this.screenOpts.name = `${this.userName}の画面共有`;
   }
 
   /**
@@ -235,17 +256,6 @@ class VonageHelper {
               data: event.data,
               from: event.from,
             });
-
-            const isFromModerator = event.from.permissions.forceDisconnect === 1;
-            if (event.type === "signal:changeName" && isFromModerator) {
-              if (this.events.changeName) {
-                this.sessionDisconnect();
-                this.setName(event.data);
-                setTimeout(() => {
-                  this.events.changeName();
-                }, 1000);
-              }
-            }
           },
           this
         )
@@ -298,6 +308,26 @@ class VonageHelper {
   }
 
   /**
+   * signal:changeNameイベントの登録
+   */
+  registerSignalChangeNameEvent() {
+    this.sessionObj.on(
+      "signal:changeName",
+      function (event) {
+        const isFromModerator = event.from.permissions.forceDisconnect === 1;
+        if (isFromModerator) {
+          this.sessionDisconnect();
+          setTimeout(() => {
+            this.token = event.data;
+            this.sessionConnect();
+          }, 1000);
+        }
+      },
+      this
+    )
+  }
+
+  /**
    * session接続処理
    */
   sessionConnect() {
@@ -316,7 +346,13 @@ class VonageHelper {
    * session切断処理
    */
   sessionDisconnect() {
-    if (this.sessionObj) this.sessionObj.disconnect();
+    if (this.sessionObj) {
+      this.sessionObj.disconnect();
+      // this.publisherObj = null;
+      // this.screenPublisherObj = null;
+      // this.subscribeObjs = [];
+      // this.subscribeScreenObj = null;
+    }
   }
 
   /**

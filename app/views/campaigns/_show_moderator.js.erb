@@ -60,9 +60,24 @@ const webrtc = new Vue({
         },
         sendSignal() {
             if (this.signalText.type === '' || this.signalText.data === '') return;
-            this.vonageHelper.sendSignal(this.signalText.type, this.signalText.data, this.signalTarget);
-            this.signalText.type = '';
-            this.signalText.data = '';
+
+            switch (this.signalText.type) {
+                case 'changeName':
+                    this.changeNameForTarget();
+                    break;
+                default:
+                    this.vonageHelper.sendSignal(this.signalText.type, this.signalText.data, this.signalTarget);
+                    this.signalText.type = '';
+                    this.signalText.data = '';
+            }
+        },
+        changeNameForTarget() {
+            const url = `/campaigns/${'<%= @campaign.id %>'}/generate_publisher_token`;
+            this.vonageHelper.getPublisherToken(url, this.signalText.data, (token) => {
+                this.vonageHelper.sendSignal(this.signalText.type, token, this.signalTarget);
+                this.signalText.type = '';
+                this.signalText.data = '';
+            });
         },
     },
 });

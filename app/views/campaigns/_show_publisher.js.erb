@@ -2,14 +2,12 @@ const webrtc = new Vue({
     el: "#publisher-wrapper",
     data: {
         vonageHelper: null,
-        userName: '',
         isVerified: false,
         audioLevel: 0,
         signalText: {
             type: '',
             data: '',
         },
-        token: '',
     },
     computed: {
         connectButtonText() {
@@ -34,37 +32,26 @@ const webrtc = new Vue({
         },
         isVerified: function(newValue) {
             if (newValue === true) {
-                this.init();
-            }
-        },
-        token: function() {
-            if (this.vonageHelper) {
-                this.vonageHelper.token = this.token;
-                this.vonageHelper.sessionConnect();
-            } else {
-                this.vonageHelper = new VonageHelper(
-                    '<%= @campaign.id %>',
-                    '<%= @opentok_info[:api_key] %>',
-                    '<%= @campaign.session_id %>',
-                    this.token,
-                    {changeName: this.changeName},
-                );
-                ///////
-                this.isVerified = true;
-                ///////
+                //this.init();
             }
         },
     },
     created() {
-
+        this.vonageHelper = new VonageHelper(
+            '<%= @campaign.id %>',
+            '<%= @opentok_info[:api_key] %>',
+            '<%= @campaign.session_id %>',
+            '<%= @opentok_info[:token] %>'
+        );
+        ///////
+        this.isVerified = true;
+        ///////
     },
     mounted() {
-
+        this.init();
     },
     methods: {
         authRequest() {
-            if (this.userName === '') return;
-            this.getToken();
         },
         init() {
             if (!this.vonageHelper) return;
@@ -89,21 +76,6 @@ const webrtc = new Vue({
             this.vonageHelper.sendSignal(this.signalText.type, this.signalText.data);
             this.signalText.type = '';
             this.signalText.data = '';
-        },
-        getToken() {
-            window.axios.get(`/campaigns/${'<%= @campaign.id %>'}/generate_publisher_token`, {
-                params: {
-                    session_id: '<%= @campaign.session_id %>',
-                    data: this.userName,
-                },
-            })
-            .then((response) => {
-                this.token = response.data;
-            });
-        },
-        changeName() {
-            this.userName = this.vonageHelper.userName;
-            this.getToken();
         },
     },
 });

@@ -1,5 +1,5 @@
 class CampaignsController < ApplicationController
-    before_action :authenticate_admin!, only: [:show_moderator]
+    before_action :authenticate_admin!, only: [:show_moderator, :generate_publisher_token]
     before_action :get_campaign, only: [:show, :show_moderator, :show_publisher, :show_subscriber]
     def test
 
@@ -41,7 +41,7 @@ class CampaignsController < ApplicationController
         # トークン発行
         if @campaign.present? && @campaign.session_id.present?
             @opentok_info = VonageService.generate_access_token(
-                { role: :publisher, data: request.user_agent },
+                { role: :publisher, data: "パネリスト" },
                 @campaign.session_id
             )
         end
