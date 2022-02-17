@@ -1,5 +1,5 @@
 class CampaignsController < ApplicationController
-    before_action :authenticate_admin!, only: [:show_moderator, :generate_publisher_token]
+    before_action :authenticate_admin!, only: [:show_moderator, :generate_moderator_token, :generate_publisher_token]
     before_action :get_campaign, only: [:show, :show_moderator, :show_publisher, :show_subscriber, :generate_moderator_token, :generate_publisher_token]
     def test
 
