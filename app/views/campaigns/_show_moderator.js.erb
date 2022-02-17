@@ -1,6 +1,7 @@
 const webrtc = new Vue({
     el: "#moderator-wrapper",
     data: {
+        userName: '',
         vonageHelper: null,
         audioLevel: 0,
         signalText: {
@@ -34,13 +35,12 @@ const webrtc = new Vue({
     created() {
         this.vonageHelper = new VonageHelper(
             '<%= @campaign.id %>',
-            '<%= @opentok_info[:api_key] %>',
+            '<%= @apiKey %>',
             '<%= @campaign.session_id %>',
-            '<%= @opentok_info[:token] %>',
+            '',
         );
     },
     mounted() {
-        this.vonageHelper.initForModerator();
         // オーディオレベルを取得
         setInterval(() => {
             $("#audio-level > div").width(`${this.vonageHelper.audioLevel * 100}%`);
@@ -52,6 +52,14 @@ const webrtc = new Vue({
         }
     },
     methods: {
+        join() {
+            if (this.userName === '') return;
+            const url = `/campaigns/${'<%= @campaign.id %>'}/generate_moderator_token`;
+            this.vonageHelper.getToken(url, this.userName, (token) => {
+                this.vonageHelper.token = token;
+                this.vonageHelper.initForModerator();
+            });
+        },
         connect() {
             this.vonageHelper.isConnected ? this.vonageHelper.sessionDisconnect() : this.vonageHelper.sessionConnect()
         },
@@ -73,7 +81,7 @@ const webrtc = new Vue({
         },
         changeNameForTarget() {
             const url = `/campaigns/${'<%= @campaign.id %>'}/generate_publisher_token`;
-            this.vonageHelper.getPublisherToken(url, this.signalText.data, (token) => {
+            this.vonageHelper.getToken(url, this.signalText.data, (token) => {
                 this.vonageHelper.sendSignal(this.signalText.type, token, this.signalTarget);
                 this.signalText.type = '';
                 this.signalText.data = '';

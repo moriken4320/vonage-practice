@@ -110,15 +110,14 @@ class VonageHelper {
   }
 
   /**
-   * publisherロールのトークンを取得
+   * トークンを取得
    * @param {string} url
    * @param {string} userName
    * @param {function} callback
    */
-  getPublisherToken(url, userName, callback) {
+  getToken(url, userName, callback) {
     window.axios.get(url, {
       params: {
-          session_id: this.sessionId,
           data: userName,
       },
     })

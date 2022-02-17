@@ -3,7 +3,7 @@
 <p>セッションID：<%= @campaign.session_id %></p>
 
 <div id="moderator-wrapper">
-    <div id="video-wrapper">
+    <div v-show="vonageHelper.isConnected" id="video-wrapper">
         <div id="videos"></div>
         <div id="user-interface">
             <div>
@@ -59,6 +59,11 @@
             </div>
             <div v-for="signal in vonageHelper.signalObj">type: {{ signal.type }}, data: {{ signal.data }}</div>
         </div>
+    </div>
+
+    <div v-show="!vonageHelper.isConnected" id="join-wrapper">
+        <input type="text" id="user-name" v-model="userName" placeholder="名前を入力">
+        <button @click="join">入室</button>
     </div>
 </div>
 

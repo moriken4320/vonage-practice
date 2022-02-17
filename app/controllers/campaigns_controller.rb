@@ -1,6 +1,6 @@
 class CampaignsController < ApplicationController
     before_action :authenticate_admin!, only: [:show_moderator, :generate_publisher_token]
-    before_action :get_campaign, only: [:show, :show_moderator, :show_publisher, :show_subscriber]
+    before_action :get_campaign, only: [:show, :show_moderator, :show_publisher, :show_subscriber, :generate_moderator_token, :generate_publisher_token]
     def test
 
     end
@@ -28,13 +28,7 @@ class CampaignsController < ApplicationController
     end
 
     def show_moderator
-        # トークン発行
-        if @campaign.present? && @campaign.session_id.present?
-            @opentok_info = VonageService.generate_access_token(
-                { role: :moderator, data: "ホスト" },
-                @campaign.session_id
-            )
-        end
+        @apiKey = VonageService::VONAGE_PROJECT_API_KEY;
     end
 
     def show_publisher
@@ -57,10 +51,17 @@ class CampaignsController < ApplicationController
         end
     end
 
+    def generate_moderator_token
+        opentok_info = VonageService.generate_access_token(
+            { role: :moderator, data: params[:data] },
+            @campaign.session_id
+        )
+        render json: opentok_info[:token]
+    end
     def generate_publisher_token
         opentok_info = VonageService.generate_access_token(
             { role: :publisher, data: params[:data] },
-            params[:session_id]
+            @campaign.session_id
         )
         render json: opentok_info[:token]
     end
