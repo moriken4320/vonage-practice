@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_02_15_094738) do
+ActiveRecord::Schema.define(version: 2022_02_17_094244) do
 
   create_table "admins", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "name", default: "", null: false
@@ -28,6 +28,7 @@ ActiveRecord::Schema.define(version: 2022_02_15_094738) do
   create_table "campaigns", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "title"
     t.string "session_id"
+    t.string "sub_session_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

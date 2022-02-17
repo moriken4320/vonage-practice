@@ -69,7 +69,7 @@ class CampaignsController < ApplicationController
     private
 
     def campaign_params
-        params.require(:campaign).permit(:title).merge(session_id: VonageService.generate_session.session_id)
+        params.require(:campaign).permit(:title).merge(session_id: VonageService.generate_session.session_id, sub_session_id: VonageService.generate_session.session_id)
     end
 
     def get_campaign
