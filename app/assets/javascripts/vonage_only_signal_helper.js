@@ -1,8 +1,10 @@
 class VonageOnlySignalHelper {
-  constructor(apiKey, sessionId, token) {
+  constructor(apiKey, sessionId, token, events = {}) {
     this.apiKey = apiKey;
     this.sessionId = sessionId;
     this.token = token;
+    this.events = events;
+    this.authRequests = [];
 
     // フラグ系
     this.isSupported = false;
@@ -11,6 +13,26 @@ class VonageOnlySignalHelper {
 
     // vonage関連のオブジェクト
     this.sessionObj = null;
+  }
+
+  /**
+   * moderator用init処理
+   */
+  initForModerator() {
+    this.initOT();
+    this.initSession();
+    this.registerSignalAuthRequest();
+    this.sessionConnect();
+  }
+
+  /**
+   * publisher用init処理
+   */
+  initForPublisher() {
+    this.initOT();
+    this.initSession();
+    this.registerSignalReceiveToken();
+    this.sessionConnect();
   }
 
   /**
@@ -34,57 +56,56 @@ class VonageOnlySignalHelper {
   initSession() {
     if (this.isSupported) {
       this.sessionObj = OT.initSession(this.apiKey, this.sessionId)
-        // セッションのアーカイブ記録が開始されたときにディスパッチ
-        // 新しいクライアント（自分を含む）がセッションに接続したときにディスパッチされ、
-        // 最初に接続したときにセッション内のすべてのクライアントに対してディスパッチされる。
-        .on(
-          "connectionCreated",
-          function (event) {
-            this.#debugLog("session connectionCreated:", event);
-          },
-          this
-        )
-        // 自分以外のクライアントがセッションから切断したときにディスパッチ
-        .on(
-          "connectionDestroyed",
-          function (event) {
-            this.#debugLog("session connectionDestroyed:", event);
-          },
-          this
-        )
-        // 自分がセッションに接続されたらディスパッチ
-        .on(
-          "sessionConnected",
-          function (event) {
-            this.#debugLog("session sessionConnected:", event);
-            this.isConnected = true;
-            const userName = event.target.connection.data;
-            this.setName(userName);
-            this.initPublisher();
-          },
-          this
-        )
-        // 自分がセッションから切断されたらディスパッチ
-        .on(
-          "sessionDisconnected",
-          function (event) {
-            this.#debugLog("session sessionDisconnected:", event);
-            this.isConnected = false;
-            if (this.isPublished) this.unPublish();
-          },
-          this
-        )
-        // セッションからシグナルを受信したときにディスパッチ
-        .on(
-          "signal",
-          function (event) {
-            this.#debugLog("session signal:", event);
-          },
-          this
-        );
+      .on(
+        "sessionConnected",
+        function (event) {
+          this.#debugLog("session sessionConnected:", event);
+        },
+        this
+      )
+      .on(
+        "sessionDisconnected",
+        function (event) {
+          this.#debugLog("session sessionDisconnected:", event);
+        },
+        this
+      );
     } else {
       this.#errorLog("not supported browser.");
     }
+  }
+
+  /**
+   * signal:authRequestイベントを登録
+   */
+  registerSignalAuthRequest() {
+    this.sessionObj.on(
+      "signal:authRequest",
+      function (event) {
+        this.#debugLog("session signal:authRequest", event);
+        this.authRequests.push(event);
+        //////
+        if (this.events.allowRequest) this.events.allowRequest(event);
+        //////
+      },
+      this
+    );
+  }
+
+  /**
+   * signal:receiveTokenイベントを登録
+   */
+  registerSignalReceiveToken() {
+    this.sessionObj.on(
+      "signal:receiveToken",
+      function (event) {
+        this.#debugLog("session signal:receiveToken", event);
+        const token = event.data;
+        if (this.events.init) this.events.init(token);
+        this.sessionDisconnect();
+      },
+      this
+    );
   }
 
   /**

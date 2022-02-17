@@ -1,8 +1,9 @@
 const webrtc = new Vue({
     el: "#publisher-wrapper",
     data: {
+        userName: '',
+        vonageOnlySignalHelper: null,
         vonageHelper: null,
-        isVerified: false,
         audioLevel: 0,
         signalText: {
             type: '',
@@ -30,39 +31,41 @@ const webrtc = new Vue({
             },
             deep: true
         },
-        isVerified: function(newValue) {
-            if (newValue === true) {
-                //this.init();
-            }
-        },
     },
     created() {
-        this.vonageHelper = new VonageHelper(
-            '<%= @opentok_info[:api_key] %>',
-            '<%= @campaign.session_id %>',
-            '<%= @opentok_info[:token] %>'
+        this.vonageOnlySignalHelper = new VonageOnlySignalHelper(
+            '<%= @opentokInfo[:api_key] %>',
+            '<%= @campaign.sub_session_id %>',
+            '<%= @opentokInfo[:token] %>',
+            {init: this.init}
         );
-        ///////
-        this.isVerified = true;
-        ///////
+        this.vonageOnlySignalHelper.initForPublisher();
+
+        this.vonageHelper = new VonageHelper(
+            '<%= @opentokInfo[:api_key] %>',
+            '<%= @campaign.session_id %>',
+            ''
+        );
     },
     mounted() {
-        this.init();
+        // オーディオレベルを取得
+        setInterval(() => {
+            $("#audio-level > div").width(`${this.vonageHelper.audioLevel * 100}%`);
+        }, 100);
+
+        // デバイスソース変更時イベント
+        navigator.mediaDevices.ondevicechange = async (event) => {
+            await this.vonageHelper.deviceUpdated();
+        }
     },
     methods: {
         authRequest() {
+            if (this.userName === '') return;
+            this.vonageOnlySignalHelper.sendSignal('authRequest', this.userName);
         },
-        init() {
-            if (!this.vonageHelper) return;
+        init(token) {
+            this.vonageHelper.token = token;
             this.vonageHelper.initForPublisher();
-            // オーディオレベルを取得
-            setInterval(() => {
-                $("#audio-level > div").width(`${this.vonageHelper.audioLevel * 100}%`);
-            }, 100);
-            // デバイスソース変更時イベント
-            navigator.mediaDevices.ondevicechange = async (event) => {
-                await this.vonageHelper.deviceUpdated();
-            }
         },
         connect() {
             this.vonageHelper.isConnected ? this.vonageHelper.sessionDisconnect() : this.vonageHelper.sessionConnect()

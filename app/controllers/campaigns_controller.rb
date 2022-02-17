@@ -28,17 +28,17 @@ class CampaignsController < ApplicationController
     end
 
     def show_moderator
-        @apiKey = VonageService::VONAGE_PROJECT_API_KEY;
+        @opentokInfo = VonageService.generate_access_token(
+            { role: :moderator, data: "moderator" },
+            @campaign.sub_session_id
+        )
     end
 
     def show_publisher
-        # トークン発行
-        if @campaign.present? && @campaign.session_id.present?
-            @opentok_info = VonageService.generate_access_token(
-                { role: :publisher, data: "パネリスト" },
-                @campaign.session_id
-            )
-        end
+        @opentokInfo = VonageService.generate_access_token(
+            { role: :subscriber, data: "beforeAuth" },
+            @campaign.sub_session_id
+        )
     end
 
     def show_subscriber

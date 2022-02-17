@@ -2,6 +2,7 @@ const webrtc = new Vue({
     el: "#moderator-wrapper",
     data: {
         userName: '',
+        vonageOnlySignalHelper: null,
         vonageHelper: null,
         audioLevel: 0,
         signalText: {
@@ -33,10 +34,17 @@ const webrtc = new Vue({
         },
     },
     created() {
+        this.vonageOnlySignalHelper = new VonageOnlySignalHelper(
+            '<%= @opentokInfo[:api_key] %>',
+            '<%= @campaign.sub_session_id %>',
+            '<%= @opentokInfo[:token] %>',
+            {allowRequest: this.allowRequest}
+        );
+
         this.vonageHelper = new VonageHelper(
-            '<%= @apiKey %>',
+            '<%= @opentokInfo[:api_key] %>',
             '<%= @campaign.session_id %>',
-            '',
+            ''
         );
     },
     mounted() {
@@ -54,8 +62,9 @@ const webrtc = new Vue({
         join() {
             if (this.userName === '') return;
             const url = `/campaigns/${'<%= @campaign.id %>'}/generate_moderator_token`;
-            this.vonageHelper.getToken(url, this.userName, (token) => {
+            Utility.getToken(url, this.userName, (token) => {
                 this.vonageHelper.token = token;
+                this.vonageOnlySignalHelper.initForModerator();
                 this.vonageHelper.initForModerator();
             });
         },
@@ -78,9 +87,15 @@ const webrtc = new Vue({
                     this.signalText.data = '';
             }
         },
+        allowRequest(requestInfo) {
+            const url = `/campaigns/${'<%= @campaign.id %>'}/generate_publisher_token`;
+            Utility.getToken(url, requestInfo.data, (token) => {
+                this.vonageOnlySignalHelper.sendSignal('receiveToken', token, requestInfo.from);
+            });
+        },
         changeNameForTarget() {
             const url = `/campaigns/${'<%= @campaign.id %>'}/generate_publisher_token`;
-            this.vonageHelper.getToken(url, this.signalText.data, (token) => {
+            Utility.getToken(url, this.signalText.data, (token) => {
                 this.vonageHelper.sendSignal(this.signalText.type, token, this.signalTarget);
                 this.signalText.type = '';
                 this.signalText.data = '';
