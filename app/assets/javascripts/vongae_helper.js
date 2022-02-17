@@ -235,7 +235,9 @@ class VonageHelper {
               data: event.data,
               from: event.from,
             });
-            if (event.type === "signal:changeName") {
+
+            const isFromModerator = event.from.permissions.forceDisconnect === 1;
+            if (event.type === "signal:changeName" && isFromModerator) {
               if (this.events.changeName) {
                 this.sessionDisconnect();
                 this.setName(event.data);

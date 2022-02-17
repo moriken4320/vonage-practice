@@ -64,7 +64,7 @@ const webrtc = new Vue({
     methods: {
         authRequest() {
             if (this.userName === '') return;
-            this.token = this.getToken();
+            this.getToken();
         },
         init() {
             if (!this.vonageHelper) return;
@@ -98,12 +98,12 @@ const webrtc = new Vue({
                 },
             })
             .then((response) => {
-                return response.data;
+                this.token = response.data;
             });
         },
         changeName() {
             this.userName = this.vonageHelper.userName;
-            this.token = this.getToken();
+            this.getToken();
         },
     },
 });
