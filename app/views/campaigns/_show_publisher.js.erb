@@ -38,7 +38,6 @@ const webrtc = new Vue({
     },
     created() {
         this.vonageHelper = new VonageHelper(
-            '<%= @campaign.id %>',
             '<%= @opentok_info[:api_key] %>',
             '<%= @campaign.session_id %>',
             '<%= @opentok_info[:token] %>'

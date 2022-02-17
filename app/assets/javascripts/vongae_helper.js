@@ -1,6 +1,5 @@
 class VonageHelper {
-  constructor(campaignId, apiKey, sessionId, token, events = {}) {
-    this.campaignId = campaignId;
+  constructor(apiKey, sessionId, token, events = {}) {
     this.apiKey = apiKey;
     this.sessionId = sessionId;
     this.token = token;
@@ -19,7 +18,6 @@ class VonageHelper {
     // フラグ系
     this.isSupported = false;
     this.isScreenSupported = false;
-    this.isFirstSubscribed = false;
     this.isConnected = false;
     this.isPublished = false;
     this.enableVideo = true;
@@ -116,15 +114,16 @@ class VonageHelper {
    * @param {function} callback
    */
   getToken(url, userName, callback) {
-    window.axios.get(url, {
-      params: {
+    window.axios
+      .get(url, {
+        params: {
           data: userName,
-      },
-    })
-    .then((response) => {
+        },
+      })
+      .then((response) => {
         const token = response.data;
         callback(token);
-    });
+      });
   }
 
   /**
@@ -136,7 +135,6 @@ class VonageHelper {
     this.videoOpts.name = this.userName;
     this.screenOpts.name = `${this.userName}の画面共有`;
   }
-
 
   /**
    * OTの初期設定
@@ -323,7 +321,7 @@ class VonageHelper {
         }
       },
       this
-    )
+    );
   }
 
   /**
@@ -347,10 +345,6 @@ class VonageHelper {
   sessionDisconnect() {
     if (this.sessionObj) {
       this.sessionObj.disconnect();
-      // this.publisherObj = null;
-      // this.screenPublisherObj = null;
-      // this.subscribeObjs = [];
-      // this.subscribeScreenObj = null;
     }
   }
 
@@ -807,5 +801,6 @@ class VonageHelper {
   }
   #errorLog(type = "Error", object = null) {
     console.error(`${type}:`, object);
+    this.isError = true;
   }
 }
