@@ -22,7 +22,6 @@ class VonageOnlySignalHelper {
     this.initOT();
     this.initSession();
     this.registerSignalAuthRequest();
-    this.sessionConnect();
   }
 
   /**
@@ -69,6 +68,7 @@ class VonageOnlySignalHelper {
         "sessionConnected",
         function (event) {
           this.#debugLog("session sessionConnected:", event);
+          this.isConnected = true;
         },
         this
       )
@@ -76,6 +76,7 @@ class VonageOnlySignalHelper {
         "sessionDisconnected",
         function (event) {
           this.#debugLog("session sessionDisconnected:", event);
+          this.isConnected = false;
         },
         this
       );

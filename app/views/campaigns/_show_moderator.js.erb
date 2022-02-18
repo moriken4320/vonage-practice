@@ -45,6 +45,9 @@ const webrtc = new Vue({
             '<%= @campaign.session_id %>',
             ''
         );
+
+        this.vonageOnlySignalHelper.initForModerator();
+        this.vonageHelper.initForModerator();
     },
     mounted() {
         // オーディオレベルを取得
@@ -63,12 +66,18 @@ const webrtc = new Vue({
             const url = `/campaigns/${'<%= @campaign.id %>'}/generate_moderator_token`;
             Utility.getToken(url, this.userName, (token) => {
                 this.vonageHelper.token = token;
-                this.vonageOnlySignalHelper.initForModerator();
-                this.vonageHelper.initForModerator();
+                this.vonageOnlySignalHelper.sessionConnect();
+                this.vonageHelper.sessionConnect();
             });
         },
         connect() {
-            this.vonageHelper.isConnected ? this.vonageHelper.sessionDisconnect() : this.vonageHelper.sessionConnect()
+            if(this.vonageHelper.isConnected) {
+                this.vonageOnlySignalHelper.sessionDisconnect();
+                this.vonageHelper.sessionDisconnect();
+            } else {
+                this.vonageOnlySignalHelper.sessionConnect();
+                this.vonageHelper.sessionConnect();
+            }
         },
         publish() {
             this.vonageHelper.isPublished ? this.vonageHelper.unPublish() : this.vonageHelper.publish()

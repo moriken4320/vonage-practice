@@ -39,13 +39,15 @@ const webrtc = new Vue({
             '<%= @opentokInfo[:token] %>',
             {init: this.init}
         );
-        this.vonageOnlySignalHelper.initForPublisher();
 
         this.vonageHelper = new VonageHelper(
             '<%= @opentokInfo[:api_key] %>',
             '<%= @campaign.session_id %>',
             ''
         );
+
+        this.vonageOnlySignalHelper.initForPublisher();
+        this.vonageHelper.initForPublisher();
     },
     mounted() {
         // オーディオレベルを取得
@@ -65,10 +67,16 @@ const webrtc = new Vue({
         },
         init(token) {
             this.vonageHelper.token = token;
-            this.vonageHelper.initForPublisher();
+            this.vonageHelper.sessionConnect();
         },
         connect() {
-            this.vonageHelper.isConnected ? this.vonageHelper.sessionDisconnect() : this.vonageHelper.sessionConnect()
+            if(this.vonageHelper.isConnected) {
+                this.vonageOnlySignalHelper.sessionConnect();
+                this.vonageHelper.sessionDisconnect();
+            } else {
+                this.vonageOnlySignalHelper.sessionDisconnect();
+                this.vonageHelper.sessionConnect();
+            }
         },
         publish() {
             this.vonageHelper.isPublished ? this.vonageHelper.unPublish() : this.vonageHelper.publish()

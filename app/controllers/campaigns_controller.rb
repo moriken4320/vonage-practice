@@ -51,14 +51,21 @@ class CampaignsController < ApplicationController
 
     def generate_moderator_token
         opentok_info = VonageService.generate_access_token(
-            { role: :moderator, data: params[:data] },
+            { role: :moderator, data: params[:data], expire_time: Time.now + 10 },
             @campaign.session_id
         )
         render json: opentok_info[:token]
     end
     def generate_publisher_token
         opentok_info = VonageService.generate_access_token(
-            { role: :publisher, data: params[:data] },
+            { role: :publisher, data: params[:data], expire_time: Time.now + 10 },
+            @campaign.session_id
+        )
+        render json: opentok_info[:token]
+    end
+    def generate_subscriber_token
+        opentok_info = VonageService.generate_access_token(
+            { role: :subscriber, data: params[:data], expire_time: Time.now + 10 },
             @campaign.session_id
         )
         render json: opentok_info[:token]

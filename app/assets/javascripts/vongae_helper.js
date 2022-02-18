@@ -86,7 +86,6 @@ class VonageHelper {
   async initForModerator() {
     this.initOT();
     this.initSession();
-    this.sessionConnect();
   }
 
   /**
@@ -96,7 +95,6 @@ class VonageHelper {
     this.initOT();
     this.initSession();
     this.registerSignalChangeNameEvent();
-    this.sessionConnect();
   }
 
   /**
