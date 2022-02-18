@@ -1,8 +1,10 @@
 const webrtc = new Vue({
     el: "#subscriber-wrapper",
     data: {
-        vonageHelper: null,
         userName: '',
+        vonageOnlySignalHelper: null,
+        vonageHelper: null,
+        audioLevel: 0,
         signalText: {
             type: '',
             data: '',
@@ -11,6 +13,15 @@ const webrtc = new Vue({
     computed: {
         connectButtonText() {
             return this.vonageHelper.isConnected ? 'dis connect' : 'connect'
+        },
+        publishButtonText() {
+            return this.vonageHelper.isPublished ? 'stop publish' : 'start publish'
+        },
+        audioButtonText() {
+            return this.vonageHelper.enableAudio ? 'stop audio' : 'start audio'
+        },
+        videoButtonText() {
+            return this.vonageHelper.enableVideo ? 'stop video' : 'start video'
         },
     },
     watch: {
@@ -22,18 +33,36 @@ const webrtc = new Vue({
         },
     },
     created() {
+        this.vonageOnlySignalHelper = new VonageOnlySignalHelper(
+            '<%= @opentokInfo[:api_key] %>',
+            '<%= @campaign.sub_session_id %>',
+            '<%= @opentokInfo[:token] %>',
+        );
+        this.vonageOnlySignalHelper.initForSubscriber();
+
         this.vonageHelper = new VonageHelper(
-            '<%= @opentok_info[:api_key] %>',
+            '<%= @opentokInfo[:api_key] %>',
             '<%= @campaign.session_id %>',
-            '<%= @opentok_info[:token] %>',
+            ''
         );
     },
     mounted() {
-        this.vonageHelper.initForSubscriber();
+        // オーディオレベルを取得
+        setInterval(() => {
+            $("#audio-level > div").width(`${this.vonageHelper.audioLevel * 100}%`);
+        }, 100);
+
+        // デバイスソース変更時イベント
+        navigator.mediaDevices.ondevicechange = async (event) => {
+            await this.vonageHelper.deviceUpdated();
+        }
     },
     methods: {
         connect() {
             this.vonageHelper.isConnected ? this.vonageHelper.sessionDisconnect() : this.vonageHelper.sessionConnect()
+        },
+        publish() {
+            this.vonageHelper.isPublished ? this.vonageHelper.unPublish() : this.vonageHelper.publish()
         },
         sendSignal() {
             if (this.signalText.type === '' || this.signalText.data === '') return;

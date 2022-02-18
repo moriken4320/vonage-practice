@@ -3,7 +3,7 @@
 <p>セッションID：<%= @campaign.session_id %></p>
 
 <div>
-    <%= link_to "moderator", show_moderator_campaign_path(@campaign) %>
-    <%= link_to "publisher", show_publisher_campaign_path(@campaign) %>
-    <%= link_to "subscriber", show_subscriber_campaign_path(@campaign) %>
+    <%= link_to "moderator", show_moderator_campaign_path(@campaign), { target: "_blank" } %>
+    <%= link_to "publisher", show_publisher_campaign_path(@campaign), { target: "_blank" } %>
+    <%= link_to "subscriber", show_subscriber_campaign_path(@campaign), { target: "_blank" } %>
 </div>

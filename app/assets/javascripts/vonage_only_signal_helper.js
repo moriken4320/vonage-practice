@@ -36,6 +36,15 @@ class VonageOnlySignalHelper {
   }
 
   /**
+   * subscriber用init処理
+   */
+   initForSubscriber() {
+    this.initOT();
+    this.initSession();
+    this.sessionConnect();
+  }
+
+  /**
    * OTの初期設定
    */
   initOT() {

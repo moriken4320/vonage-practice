@@ -1,9 +1,19 @@
+admin:
 <% if admin_signed_in? %>
     <%= link_to "ログアウト", destroy_admin_session_path, method: :delete %>
 <% elsif %>
     <%= link_to "サインアップ", new_admin_registration_path %>
     <%= link_to "ログイン", new_admin_session_path %>
 <% end %>
+<hr>
+user:
+<% if user_signed_in? %>
+    <%= link_to "ログアウト", destroy_user_session_path, method: :delete %>
+<% elsif %>
+    <%= link_to "サインアップ", new_user_registration_path %>
+    <%= link_to "ログイン", new_user_session_path %>
+<% end %>
+<hr>
 
 
 <p>キャンペーン一覧</p>

@@ -105,6 +105,7 @@ class VonageHelper {
   async initForSubscriber() {
     this.initOT();
     this.initSession();
+    this.sessionConnect();
   }
 
   /**
