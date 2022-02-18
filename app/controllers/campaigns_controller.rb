@@ -1,5 +1,5 @@
 class CampaignsController < ApplicationController
-    before_action :authenticate_admin!, only: [:show_moderator, :generate_moderator_token, :generate_publisher_token, :start_broadcast, :stop_broadcast]
+    before_action :authenticate_admin!, except: [:test, :index, :new, :create, :show, :show_publisher, :show_subscriber, :generate_subscriber_token]
     before_action :authenticate_user!, only: [:show_subscriber, :generate_subscriber_token]
     before_action :get_campaign, except: [:test, :index, :new, :create]
     def test
@@ -84,6 +84,18 @@ class CampaignsController < ApplicationController
         @campaign.status = 0
         @campaign.save
         render json: false
+    end
+    def start_recording
+        VonageService.start_recording(@campaign.session_id)
+        render json: true
+    end
+    def stop_recording
+        VonageService.stop_recording(@campaign.session_id)
+        render json: false
+    end
+    def get_recording_status
+        archive_id = VonageService.find_starting_archive(@campaign.session_id)
+        render json: !archive_id.nil?
     end
 
 

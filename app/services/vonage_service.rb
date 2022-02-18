@@ -31,10 +31,11 @@ module VonageService
     # 録画開始
     #
     # @params [String] vonage session_id
-    def start_recording(session_id)
+    def start_recording(session_id, layout = {})
       generate_opentok.archives.create(session_id, {
                                          name: session_id,
-                                         resolution: '1280x720'
+                                         resolution: '1280x720',
+                                         layout: layout,
                                        })
     end
 
