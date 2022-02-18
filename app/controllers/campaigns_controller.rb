@@ -1,7 +1,7 @@
 class CampaignsController < ApplicationController
-    before_action :authenticate_admin!, only: [:show_moderator, :generate_moderator_token, :generate_publisher_token]
+    before_action :authenticate_admin!, only: [:show_moderator, :generate_moderator_token, :generate_publisher_token, :generate_subscriber_token, :start_broadcast, :stop_broadcast]
     before_action :authenticate_user!, only: [:show_subscriber]
-    before_action :get_campaign, only: [:show, :show_moderator, :show_publisher, :show_subscriber, :generate_moderator_token, :generate_publisher_token]
+    before_action :get_campaign, except: [:test, :index, :new, :create]
     def test
 
     end
@@ -49,27 +49,44 @@ class CampaignsController < ApplicationController
         )
     end
 
+    # API
     def generate_moderator_token
-        opentok_info = VonageService.generate_access_token(
+        opentokInfo = VonageService.generate_access_token(
             { role: :moderator, data: params[:data], expire_time: Time.now + 10 },
             @campaign.session_id
         )
-        render json: opentok_info[:token]
+        render json: opentokInfo[:token]
     end
     def generate_publisher_token
-        opentok_info = VonageService.generate_access_token(
+        opentokInfo = VonageService.generate_access_token(
             { role: :publisher, data: params[:data], expire_time: Time.now + 10 },
             @campaign.session_id
         )
-        render json: opentok_info[:token]
+        render json: opentokInfo[:token]
     end
     def generate_subscriber_token
-        opentok_info = VonageService.generate_access_token(
-            { role: :subscriber, data: params[:data], expire_time: Time.now + 10 },
-            @campaign.session_id
-        )
-        render json: opentok_info[:token]
+        result = {}
+        if @campaign.status === 1
+            opentokInfo = VonageService.generate_access_token(
+                { role: :subscriber, data: params[:data], expire_time: Time.now + 10 },
+                @campaign.session_id
+            )
+            result = {type: :success, data: opentokInfo[:token]}
+        else
+            result = {type: :error, data: nil}
+        end
     end
+    def start_broadcast
+        @campaign.status = 1
+        @campaign.save
+        render json: true
+    end
+    def stop_broadcast
+        @campaign.status = 0
+        @campaign.save
+        render json: false
+    end
+
 
     private
 

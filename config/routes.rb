@@ -10,6 +10,9 @@ Rails.application.routes.draw do
       get :show_subscriber
       get :generate_moderator_token
       get :generate_publisher_token
+      get :generate_subscriber_token
+      get :start_broadcast
+      get :stop_broadcast
     end
   end
 end

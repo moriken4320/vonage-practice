@@ -10,6 +10,7 @@ const webrtc = new Vue({
             data: '',
         },
         signalTarget: null,
+        isBroadcast: false,
     },
     computed: {
         connectButtonText() {
@@ -24,6 +25,9 @@ const webrtc = new Vue({
         videoButtonText() {
             return this.vonageHelper.enableVideo ? 'stop video' : 'start video'
         },
+        broadcastButtonText() {
+            return this.isBroadcast ? 'stop broadcast' : 'start broadcast'
+        },
     },
     watch: {
         vonageHelper: {
@@ -34,6 +38,8 @@ const webrtc = new Vue({
         },
     },
     created() {
+        '<%= @campaign.status %>' === '1' ? this.isBroadcast = true : this.isBroadcast = false
+
         this.vonageOnlySignalHelper = new VonageOnlySignalHelper(
             '<%= @opentokInfo[:api_key] %>',
             '<%= @campaign.sub_session_id %>',
@@ -114,6 +120,11 @@ const webrtc = new Vue({
                 this.signalText.type = '';
                 this.signalText.data = '';
             });
+        },
+        broadcast() {
+            let url;
+            this.isBroadcast ? url = `/campaigns/${'<%= @campaign.id %>'}/stop_broadcast` : url = `/campaigns/${'<%= @campaign.id %>'}/start_broadcast`
+            window.axios.get(url).then((response) => this.isBroadcast = response.data);
         },
     },
 });

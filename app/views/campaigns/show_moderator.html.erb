@@ -9,6 +9,7 @@
             <div>
                 <button @click="connect">{{ connectButtonText }}</button>
                 <button @click="publish" v-if="vonageHelper.isConnected">{{ publishButtonText }}</button>
+                <button @click="broadcast" v-if="vonageHelper.isConnected">{{ broadcastButtonText }}</button>
                 <button @click="vonageHelper.setAudioEnabled(!vonageHelper.enableAudio)">{{ audioButtonText }}</button>
                 <button @click="vonageHelper.setVideoEnabled(!vonageHelper.enableVideo)">{{ videoButtonText }}</button>
                 <button @click="vonageHelper.startScreenShare()" v-if="vonageHelper.isPublished">screen share</button>
