@@ -1,6 +1,6 @@
 class CampaignsController < ApplicationController
-    before_action :authenticate_admin!, only: [:show_moderator, :generate_moderator_token, :generate_publisher_token, :generate_subscriber_token, :start_broadcast, :stop_broadcast]
-    before_action :authenticate_user!, only: [:show_subscriber]
+    before_action :authenticate_admin!, only: [:show_moderator, :generate_moderator_token, :generate_publisher_token, :start_broadcast, :stop_broadcast]
+    before_action :authenticate_user!, only: [:show_subscriber, :generate_subscriber_token]
     before_action :get_campaign, except: [:test, :index, :new, :create]
     def test
 
@@ -65,15 +65,14 @@ class CampaignsController < ApplicationController
         render json: opentokInfo[:token]
     end
     def generate_subscriber_token
-        result = {}
         if @campaign.status === 1
             opentokInfo = VonageService.generate_access_token(
                 { role: :subscriber, data: params[:data], expire_time: Time.now + 10 },
                 @campaign.session_id
             )
-            result = {type: :success, data: opentokInfo[:token]}
+            render json: opentokInfo[:token]
         else
-            result = {type: :error, data: nil}
+            render json: ''
         end
     end
     def start_broadcast

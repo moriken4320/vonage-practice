@@ -1,9 +1,10 @@
 const webrtc = new Vue({
     el: "#subscriber-wrapper",
     data: {
-        userName: '',
+        userName: 'Anonymous',
         vonageOnlySignalHelper: null,
         vonageHelper: null,
+        isBroadcast: false,
         audioLevel: 0,
         signalText: {
             type: '',
@@ -33,18 +34,24 @@ const webrtc = new Vue({
         },
     },
     created() {
+        '<%= @campaign.status %>' === '1' ? this.isBroadcast = true : this.isBroadcast = false
+
         this.vonageOnlySignalHelper = new VonageOnlySignalHelper(
             '<%= @opentokInfo[:api_key] %>',
             '<%= @campaign.sub_session_id %>',
             '<%= @opentokInfo[:token] %>',
+            {setBroadcast: this.setBroadcast}
         );
-        this.vonageOnlySignalHelper.initForSubscriber();
 
         this.vonageHelper = new VonageHelper(
             '<%= @opentokInfo[:api_key] %>',
             '<%= @campaign.session_id %>',
-            ''
+            '',
+            {setBroadcast: this.setBroadcast}
         );
+
+        this.vonageOnlySignalHelper.initForSubscriber();
+        this.vonageHelper.initForSubscriber();
     },
     mounted() {
         // オーディオレベルを取得
@@ -58,8 +65,26 @@ const webrtc = new Vue({
         }
     },
     methods: {
+        setBroadcast(bool) {
+            this.isBroadcast = bool;
+            if (!this.isBroadcast) {
+                if(!this.vonageOnlySignalHelper.isConnected) this.vonageOnlySignalHelper.sessionConnect();
+                this.vonageHelper.sessionDisconnect();
+            }
+        },
         connect() {
-            this.vonageHelper.isConnected ? this.vonageHelper.sessionDisconnect() : this.vonageHelper.sessionConnect()
+            if(this.vonageHelper.isConnected) {
+                this.vonageOnlySignalHelper.sessionConnect();
+                this.vonageHelper.sessionDisconnect();
+            } else {
+                const url = `/campaigns/${'<%= @campaign.id %>'}/generate_subscriber_token`;
+                Utility.getToken(url, this.userName, (token) => {
+                    if (token === '') return;
+                    this.vonageHelper.token = token;
+                    this.vonageOnlySignalHelper.sessionDisconnect();
+                    this.vonageHelper.sessionConnect();
+                });
+            }
         },
         publish() {
             this.vonageHelper.isPublished ? this.vonageHelper.unPublish() : this.vonageHelper.publish()

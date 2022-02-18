@@ -108,9 +108,13 @@ const webrtc = new Vue({
             });
         },
         broadcast() {
-            let url;
-            this.isBroadcast ? url = `/campaigns/${'<%= @campaign.id %>'}/stop_broadcast` : url = `/campaigns/${'<%= @campaign.id %>'}/start_broadcast`
-            window.axios.get(url).then((response) => this.isBroadcast = response.data);
+            const url = this.isBroadcast ? `/campaigns/${'<%= @campaign.id %>'}/stop_broadcast` : `/campaigns/${'<%= @campaign.id %>'}/start_broadcast`
+            window.axios.get(url).then((response) => {
+                this.isBroadcast = response.data;
+                const isBroadcastText = this.isBroadcast ? 'true' : 'false';
+                this.vonageOnlySignalHelper.sendSignal('broadcast', isBroadcastText);
+                this.vonageHelper.sendSignal('broadcast', isBroadcastText);
+            });
         },
     },
 });

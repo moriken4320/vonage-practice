@@ -6,9 +6,11 @@
     <div id="video-wrapper">
         <div id="videos"></div>
         <div id="user-interface">
-            <div>
+            <div v-if="isBroadcast">
+                <div v-if="!vonageHelper.isConnected" style="font-weight: bold;">配信が開始しています。</div>
                 <button @click="connect">{{ connectButtonText }}</button>
             </div>
+            <div v-else style="font-weight: bold;">配信が開始されるまでお待ちください。</div>
         </div>
         <div id="message-area" v-if="vonageHelper.isConnected">
             <div style="font-weight: bold;">シグナル</div>

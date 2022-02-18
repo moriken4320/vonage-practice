@@ -102,7 +102,7 @@ class VonageHelper {
   async initForSubscriber() {
     this.initOT();
     this.initSession();
-    this.sessionConnect();
+    this.registerSignalBroadcast();
   }
 
   /**
@@ -190,6 +190,8 @@ class VonageHelper {
           function (event) {
             this.#debugLog("session sessionConnected:", event);
             this.isConnected = true;
+            const isSubscriberRole = event.target.connection.permissions.publish === 0;
+            if (isSubscriberRole) return;
             const userName = event.target.connection.data;
             this.setName(userName);
             this.initPublisher();
@@ -281,6 +283,20 @@ class VonageHelper {
     } else {
       this.#errorLog("not supported browser.");
     }
+  }
+
+  /**
+   * signal:broadcastイベントを登録
+   */
+   registerSignalBroadcast() {
+    this.sessionObj.on(
+      "signal:broadcast",
+      function (event) {
+        this.#debugLog("session signal:broadcast", event);
+        if (this.events.setBroadcast) this.events.setBroadcast(event.data === 'true');
+      },
+      this
+    );
   }
 
   /**
