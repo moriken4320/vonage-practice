@@ -35,6 +35,16 @@
         <div id="information">
             <div id="audio-level"><div></div></div>
         </div>
+        <div id="request-area" v-if="vonageHelper.isConnected">
+            <div style="font-weight: bold;">参加リクエスト</div>
+            <div v-for="request in vonageOnlySignalHelper.authRequests">
+                <div>name:
+                    <input type="text" v-model="request.data">
+                    <button @click="allowRequest(request)">承認</button>
+                    <button @click="removeRequest(request)">拒否</button>
+                </div>
+            </div>
+        </div>
         <div id="panelist-area" v-if="vonageHelper.isConnected">
             <div style="font-weight: bold;">パネリスト</div>
             <div v-for="subscriber in vonageHelper.subscribeObjs">

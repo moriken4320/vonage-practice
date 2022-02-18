@@ -84,9 +84,6 @@ class VonageOnlySignalHelper {
       function (event) {
         this.#debugLog("session signal:authRequest", event);
         this.authRequests.push(event);
-        //////
-        if (this.events.allowRequest) this.events.allowRequest(event);
-        //////
       },
       this
     );

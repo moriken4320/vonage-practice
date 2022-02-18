@@ -38,7 +38,6 @@ const webrtc = new Vue({
             '<%= @opentokInfo[:api_key] %>',
             '<%= @campaign.sub_session_id %>',
             '<%= @opentokInfo[:token] %>',
-            {allowRequest: this.allowRequest}
         );
 
         this.vonageHelper = new VonageHelper(
@@ -91,6 +90,12 @@ const webrtc = new Vue({
             const url = `/campaigns/${'<%= @campaign.id %>'}/generate_publisher_token`;
             Utility.getToken(url, requestInfo.data, (token) => {
                 this.vonageOnlySignalHelper.sendSignal('receiveToken', token, requestInfo.from);
+                this.removeRequest(requestInfo);
+            });
+        },
+        removeRequest(requestInfo) {
+            this.vonageOnlySignalHelper.authRequests = this.vonageOnlySignalHelper.authRequests.filter(function(request) {
+                return request !== requestInfo;
             });
         },
         changeNameForTarget() {
