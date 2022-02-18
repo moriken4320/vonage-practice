@@ -91,15 +91,9 @@ const webrtc = new Vue({
         sendSignal() {
             if (this.signalText.type === '' || this.signalText.data === '') return;
 
-            switch (this.signalText.type) {
-                case 'changeName':
-                    this.changeNameForTarget();
-                    break;
-                default:
-                    this.vonageHelper.sendSignal(this.signalText.type, this.signalText.data, this.signalTarget);
-                    this.signalText.type = '';
-                    this.signalText.data = '';
-            }
+            this.vonageHelper.sendSignal(this.signalText.type, this.signalText.data, this.signalTarget);
+            this.signalText.type = '';
+            this.signalText.data = '';
         },
         allowRequest(requestInfo) {
             const url = `/campaigns/${'<%= @campaign.id %>'}/generate_publisher_token`;
@@ -111,14 +105,6 @@ const webrtc = new Vue({
         removeRequest(requestInfo) {
             this.vonageOnlySignalHelper.authRequests = this.vonageOnlySignalHelper.authRequests.filter(function(request) {
                 return request !== requestInfo;
-            });
-        },
-        changeNameForTarget() {
-            const url = `/campaigns/${'<%= @campaign.id %>'}/generate_publisher_token`;
-            Utility.getToken(url, this.signalText.data, (token) => {
-                this.vonageHelper.sendSignal(this.signalText.type, token, this.signalTarget);
-                this.signalText.type = '';
-                this.signalText.data = '';
             });
         },
         broadcast() {

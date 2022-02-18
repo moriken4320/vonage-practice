@@ -94,7 +94,6 @@ class VonageHelper {
   async initForPublisher() {
     this.initOT();
     this.initSession();
-    this.registerSignalChangeNameEvent();
   }
 
   /**
@@ -282,26 +281,6 @@ class VonageHelper {
     } else {
       this.#errorLog("not supported browser.");
     }
-  }
-
-  /**
-   * signal:changeNameイベントの登録
-   */
-  registerSignalChangeNameEvent() {
-    this.sessionObj.on(
-      "signal:changeName",
-      function (event) {
-        const isFromModerator = event.from.permissions.forceDisconnect === 1;
-        if (isFromModerator) {
-          this.sessionDisconnect();
-          setTimeout(() => {
-            this.token = event.data;
-            this.sessionConnect();
-          }, 1000);
-        }
-      },
-      this
-    );
   }
 
   /**
