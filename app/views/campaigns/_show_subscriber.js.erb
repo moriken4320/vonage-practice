@@ -36,22 +36,23 @@ const webrtc = new Vue({
     created() {
         '<%= @campaign.status %>' === '1' ? this.isBroadcast = true : this.isBroadcast = false
 
-        this.vonageOnlySignalHelper = new VonageOnlySignalHelper(
+        this.vonageOnlySignalHelper = new VonageHelper(
             '<%= @opentokInfo[:api_key] %>',
             '<%= @campaign.sub_session_id %>',
             '<%= @opentokInfo[:token] %>',
-            {setBroadcast: this.setBroadcast}
+            true
         );
+        this.vonageOnlySignalHelper.init();
+        this.vonageOnlySignalHelper.registerSignalEvent('broadcast', this.setBroadcast);
+        this.vonageOnlySignalHelper.sessionConnect();
 
         this.vonageHelper = new VonageHelper(
             '<%= @opentokInfo[:api_key] %>',
             '<%= @campaign.session_id %>',
             '',
-            {setBroadcast: this.setBroadcast}
         );
-
-        this.vonageOnlySignalHelper.initForSubscriber();
-        this.vonageHelper.initForSubscriber();
+        this.vonageHelper.init();
+        this.vonageHelper.registerSignalEvent('broadcast', this.setBroadcast);
     },
     mounted() {
         // オーディオレベルを取得
@@ -65,12 +66,11 @@ const webrtc = new Vue({
         }
     },
     methods: {
-        setBroadcast(bool) {
-            this.isBroadcast = bool;
-            if (!this.isBroadcast) {
-                if(!this.vonageOnlySignalHelper.isConnected) this.vonageOnlySignalHelper.sessionConnect();
-                this.vonageHelper.sessionDisconnect();
-            }
+        setBroadcast(event) {
+            this.isBroadcast = event.data === 'true';
+            if (this.isBroadcast) return;
+            if (!this.vonageOnlySignalHelper.isConnected) this.vonageOnlySignalHelper.sessionConnect();
+            this.vonageHelper.sessionDisconnect();
         },
         connect() {
             if(this.vonageHelper.isConnected) {

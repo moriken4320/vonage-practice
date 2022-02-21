@@ -1,9 +1,9 @@
 class VonageHelper {
-  constructor(apiKey, sessionId, token, events = {}) {
+  constructor(apiKey, sessionId, token, isOnlySignal = false) {
     this.apiKey = apiKey;
     this.sessionId = sessionId;
     this.token = token;
-    this.events = events;
+    this.isOnlySignal = isOnlySignal;
     this.videoTagId = "videos";
     this.audioOffImage = null;
     this.videoOffImage = null;
@@ -81,28 +81,11 @@ class VonageHelper {
   }
 
   /**
-   * moderator用init処理
+   * init処理
    */
-  async initForModerator() {
+  async init() {
     this.initOT();
     this.initSession();
-  }
-
-  /**
-   * publisher用init処理
-   */
-  async initForPublisher() {
-    this.initOT();
-    this.initSession();
-  }
-
-  /**
-   * subscriber用init処理
-   */
-  async initForSubscriber() {
-    this.initOT();
-    this.initSession();
-    this.registerSignalBroadcast();
   }
 
   /**
@@ -191,7 +174,7 @@ class VonageHelper {
             this.#debugLog("session sessionConnected:", event);
             this.isConnected = true;
             const isSubscriberRole = event.target.connection.permissions.publish === 0;
-            if (isSubscriberRole) return;
+            if (isSubscriberRole || this.isOnlySignal) return;
             const userName = event.target.connection.data;
             this.setName(userName);
             this.initPublisher();
@@ -286,14 +269,16 @@ class VonageHelper {
   }
 
   /**
-   * signal:broadcastイベントを登録
+   * signalイベントを登録
+   * @param {string} type
+   * @param {function} callback
    */
-   registerSignalBroadcast() {
+   registerSignalEvent(type, callback = null) {
+     if (!this.sessionObj) return;
     this.sessionObj.on(
-      "signal:broadcast",
+      `signal:${type}`,
       function (event) {
-        this.#debugLog("session signal:broadcast", event);
-        if (this.events.setBroadcast) this.events.setBroadcast(event.data === 'true');
+        if (callback) callback(event);
       },
       this
     );

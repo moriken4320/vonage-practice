@@ -9,6 +9,7 @@ const webrtc = new Vue({
             type: '',
             data: '',
         },
+        authRequests: [],
         signalTarget: null,
         isBroadcast: false,
         isRecording: false,
@@ -41,20 +42,21 @@ const webrtc = new Vue({
     created() {
         '<%= @campaign.status %>' === '1' ? this.isBroadcast = true : this.isBroadcast = false
 
-        this.vonageOnlySignalHelper = new VonageOnlySignalHelper(
+        this.vonageOnlySignalHelper = new VonageHelper(
             '<%= @opentokInfo[:api_key] %>',
             '<%= @campaign.sub_session_id %>',
             '<%= @opentokInfo[:token] %>',
+            true
         );
+        this.vonageOnlySignalHelper.init();
+        this.vonageOnlySignalHelper.registerSignalEvent('authRequest', this.setAuthRequests);
 
         this.vonageHelper = new VonageHelper(
             '<%= @opentokInfo[:api_key] %>',
             '<%= @campaign.session_id %>',
             ''
         );
-
-        this.vonageOnlySignalHelper.initForModerator();
-        this.vonageHelper.initForModerator();
+        this.vonageHelper.init();
     },
     mounted() {
         // オーディオレベルを取得
@@ -68,6 +70,12 @@ const webrtc = new Vue({
         }
     },
     methods: {
+        setAuthRequests(event) {
+            this.authRequests = this.authRequests.filter(function(request) {
+                return request.from !== event.from;
+            });
+            this.authRequests.push(event);
+        },
         join() {
             if (this.userName === '') return;
             const url = `/campaigns/${'<%= @campaign.id %>'}/generate_moderator_token`;
@@ -104,7 +112,7 @@ const webrtc = new Vue({
             });
         },
         removeRequest(requestInfo) {
-            this.vonageOnlySignalHelper.authRequests = this.vonageOnlySignalHelper.authRequests.filter(function(request) {
+            this.authRequests = this.authRequests.filter(function(request) {
                 return request !== requestInfo;
             });
         },
