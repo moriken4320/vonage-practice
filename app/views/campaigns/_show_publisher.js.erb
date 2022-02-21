@@ -68,7 +68,11 @@ const webrtc = new Vue({
         },
         authRequest() {
             if (this.userName === '') return;
-            this.vonageOnlySignalHelper.sendSignal('authRequest', this.userName);
+            if (this.vonageOnlySignalHelper.existedModeratorCount > 0) {
+                this.vonageOnlySignalHelper.sendSignal('authRequest', this.userName);
+            } else {
+                window.alert('ホストがセッションに存在しません。');
+            }
         },
         connect() {
             if(this.vonageHelper.isConnected) {

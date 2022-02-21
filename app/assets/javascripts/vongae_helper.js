@@ -8,6 +8,7 @@ class VonageHelper {
     this.audioOffImage = null;
     this.videoOffImage = null;
     this.userName = "";
+    this.existedModeratorCount = 0;
 
     // デバイス系
     this.audioDeviceList = [];
@@ -148,6 +149,8 @@ class VonageHelper {
           "connectionCreated",
           function (event) {
             this.#debugLog("session connectionCreated:", event);
+            const isModerator = event.connection.permissions.forceDisconnect === 1;
+            if (isModerator) this.existedModeratorCount++;
           },
           this
         )
@@ -156,6 +159,8 @@ class VonageHelper {
           "connectionDestroyed",
           function (event) {
             this.#debugLog("session connectionDestroyed:", event);
+            const isModerator = event.connection.permissions.forceDisconnect === 1;
+            if (isModerator) this.existedModeratorCount--;
           },
           this
         )
