@@ -1,35 +1,41 @@
 const webrtc = new Vue({
     el: "#moderator-wrapper",
     data: {
-        userName: '',
-        vonageOnlySignalHelper: null,
-        vonageHelper: null,
-        audioLevel: 0,
-        signalText: {
+        userName: '',  // ユーザー名
+        vonageOnlySignalHelper: null,  // シグナル専用vonageHelperインスタンス
+        vonageHelper: null,  // vonageHelperインスタンス
+        audioLevel: 0,  // オーディオレベル
+        signalText: {  // 送信シグナルデータ
             type: '',
             data: '',
+            to: null,
         },
-        authRequests: [],
-        signalTarget: null,
-        isBroadcast: false,
-        isRecorded: false,
+        authRequests: [],  // パネリストからの認証リクエストリスト
+        isBroadcast: false,  // 視聴者へ向けて配信しているかどうか
+        isRecorded: false,  // 録画しているかどうか
     },
     computed: {
+        // 接続・切断ボタンテキスト
         connectButtonText() {
             return this.vonageHelper.isConnected ? 'dis connect' : 'connect'
         },
+        // 公開・非公開ボタンテキスト
         publishButtonText() {
             return this.vonageHelper.isPublished ? 'stop publish' : 'start publish'
         },
+        // 音声ON/OFFボタンテキスト
         audioButtonText() {
             return this.vonageHelper.enableAudio ? 'stop audio' : 'start audio'
         },
+        // 映像ON/OFFボタンテキスト
         videoButtonText() {
             return this.vonageHelper.enableVideo ? 'stop video' : 'start video'
         },
+        // 視聴者へ配信開始・停止ボタンテキスト
         broadcastButtonText() {
             return this.isBroadcast ? 'stop broadcast' : 'start broadcast'
         },
+        // 録画開始・停止ボタンテキスト
         recordingButtonText() {
             return this.isRecorded ? 'stop recording' : 'start recording'
         },
@@ -46,6 +52,7 @@ const webrtc = new Vue({
         this.isBroadcast = '<%= @campaign.status %>' === '1';
         this.isRecorded = '<%= @campaign.is_recorded %>' === 'true';
 
+        // シグナル専用インスタンスを生成 //////////////////
         this.vonageOnlySignalHelper = new VonageHelper(
             '<%= @opentokInfo[:api_key] %>',
             '<%= @campaign.sub_session_id %>',
@@ -53,13 +60,17 @@ const webrtc = new Vue({
             true
         );
         this.vonageOnlySignalHelper.init();
+        // signal:authRequestイベントを登録
         this.vonageOnlySignalHelper.registerSignalEvent('authRequest', this.setAuthRequests);
+        // signal:removeAuthRequestイベントを登録
         this.vonageOnlySignalHelper.registerSignalEvent('removeAuthRequest', (event) => {
+            // 受信した情報と一致するパネリストからの認証リクエストリスト内の情報を削除
             this.authRequests = this.authRequests.filter(function(request) {
                 return request.from.connectionId !== event.data;
             });
         });
 
+        // 配信用インスタンスを生成 //////////////////////
         this.vonageHelper = new VonageHelper(
             '<%= @opentokInfo[:api_key] %>',
             '<%= @campaign.session_id %>',
@@ -79,21 +90,35 @@ const webrtc = new Vue({
         }
     },
     methods: {
+        /**
+         * パネリストからの認証リクエストデータを「authRequests」に格納
+         * @param {object} event
+         */
         setAuthRequests(event) {
+            // 送信先が異なるデータのみを抜粋
             this.authRequests = this.authRequests.filter(function(request) {
                 return request.from !== event.from;
             });
             this.authRequests.push(event);
         },
+        /**
+         * 指定した名前でセッションに接続
+         */
         join() {
             if (this.userName === '') return;
             const url = `/campaigns/${'<%= @campaign.id %>'}/generate_moderator_token`;
             Utility.getToken(url, this.userName, (token) => {
-                this.vonageHelper.token = token;
+                // シグナル専用インスタンスでセッションに接続
                 this.vonageOnlySignalHelper.sessionConnect();
+
+                // モデレーター用トークンを取得し、配信用インスタンスでセッションに接続
+                this.vonageHelper.token = token;
                 this.vonageHelper.sessionConnect();
             });
         },
+        /**
+         * セッションに接続・切断
+         */
         connect() {
             if(this.vonageHelper.isConnected) {
                 this.vonageOnlySignalHelper.sessionDisconnect();
@@ -103,29 +128,46 @@ const webrtc = new Vue({
                 this.vonageHelper.sessionConnect();
             }
         },
+        /**
+         * 公開・非公開
+         */
         publish() {
             this.vonageHelper.isPublished ? this.vonageHelper.unPublish() : this.vonageHelper.publish()
         },
+        /**
+         * シグナル送信
+         */
         sendSignal() {
             if (this.signalText.type === '' || this.signalText.data === '') return;
 
-            this.vonageHelper.sendSignal(this.signalText.type, this.signalText.data, this.signalTarget);
+            this.vonageHelper.sendSignal(this.signalText.type, this.signalText.data, this.signalText.to);
             this.signalText.type = '';
             this.signalText.data = '';
         },
+        /**
+         * パネリストからの認証リクエストを許可
+         */
         allowRequest(requestInfo) {
             const url = `/campaigns/${'<%= @campaign.id %>'}/generate_publisher_token`;
             Utility.getToken(url, requestInfo.data, (token) => {
+                // 取得したトークンを認証リクエスト送信者に送信
                 this.vonageOnlySignalHelper.sendSignal('receiveToken', token, requestInfo.from);
                 this.removeRequest(requestInfo);
             });
         },
+        /**
+         * パネリストからの認証リクエストリストを削除
+         */
         removeRequest(requestInfo) {
             this.authRequests = this.authRequests.filter(function(request) {
                 return request !== requestInfo;
             });
+            // 他のmoderatorに削除情報を通知
             this.vonageOnlySignalHelper.sendSignal('removeAuthRequest', requestInfo.from.connectionId);
         },
+        /**
+         * 視聴者への配信を開始・停止
+         */
         broadcast() {
             const url = this.isBroadcast ? `/campaigns/${'<%= @campaign.id %>'}/stop_broadcast` : `/campaigns/${'<%= @campaign.id %>'}/start_broadcast`
             window.axios.get(url).then((response) => {
@@ -135,6 +177,9 @@ const webrtc = new Vue({
                 this.vonageHelper.sendSignal('broadcast', isBroadcastText);
             });
         },
+        /**
+         * 録画の開始・停止
+         */
         recording() {
             const url = this.isRecorded ? `/campaigns/${'<%= @campaign.id %>'}/stop_recording` : `/campaigns/${'<%= @campaign.id %>'}/start_recording`
             window.axios.get(url).then((response) => {

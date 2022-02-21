@@ -51,7 +51,7 @@
             <div style="font-weight: bold;">パネリスト</div>
             <div v-for="subscriber in vonageHelper.subscribeObjs">
                 <label>
-                    <input type="radio" name="signal_target" :value="subscriber.stream.connection" v-model="signalTarget">
+                    <input type="radio" name="signal_target" :value="subscriber.stream.connection" v-model="signalText['to']">
                     <span>id: {{ subscriber.stream.connection.id }} , name: {{ subscriber.stream.connection.data }}</span>
                 </label>
             </div>
@@ -60,7 +60,7 @@
             <div>
                 <span style="font-weight: bold;">シグナル</span>
                 <label>
-                    <input type="radio" name="signal_target" :value="null" v-model="signalTarget">
+                    <input type="radio" name="signal_target" :value="null" v-model="signalText['to']">
                     <span>not signal target</span>
                 </label>
             </div>
