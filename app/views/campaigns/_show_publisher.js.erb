@@ -1,25 +1,29 @@
 const webrtc = new Vue({
     el: "#publisher-wrapper",
     data: {
-        userName: '',
-        vonageOnlySignalHelper: null,
-        vonageHelper: null,
-        audioLevel: 0,
-        signalText: {
+        userName: '',  // ユーザー名
+        vonageOnlySignalHelper: null,  // シグナル専用vonageHelperインスタンス
+        vonageHelper: null,  // vonageHelperインスタンス
+        audioLevel: 0,  // オーディオレベル
+        signalText: {  // 送信シグナルデータ
             type: '',
             data: '',
         },
     },
     computed: {
+        // 接続・切断ボタンテキスト
         connectButtonText() {
             return this.vonageHelper?.isConnected ? 'dis connect' : 'connect'
         },
+        // 公開・非公開ボタンテキスト
         publishButtonText() {
             return this.vonageHelper?.isPublished ? 'stop publish' : 'start publish'
         },
+        // 音声ON/OFFボタンテキスト
         audioButtonText() {
             return this.vonageHelper?.enableAudio ? 'stop audio' : 'start audio'
         },
+        // 映像ON/OFFボタンテキスト
         videoButtonText() {
             return this.vonageHelper?.enableVideo ? 'stop video' : 'start video'
         },
@@ -33,6 +37,7 @@ const webrtc = new Vue({
         },
     },
     created() {
+        // シグナル専用インスタンスを生成 //////////////////
         this.vonageOnlySignalHelper = new VonageHelper(
             '<%= @opentokInfo[:api_key] %>',
             '<%= @campaign.sub_session_id %>',
@@ -40,9 +45,12 @@ const webrtc = new Vue({
             true
         );
         this.vonageOnlySignalHelper.init();
-        this.vonageOnlySignalHelper.registerSignalEvent('receiveToken', this.init);
+        // signal:receiveTokenイベントを登録
+        this.vonageOnlySignalHelper.registerSignalEvent('receiveToken', this.initConnect);
+        // セッションに接続
         this.vonageOnlySignalHelper.sessionConnect();
 
+        // 配信用インスタンスを生成 //////////////////////
         this.vonageHelper = new VonageHelper(
             '<%= @opentokInfo[:api_key] %>',
             '<%= @campaign.session_id %>',
@@ -62,10 +70,17 @@ const webrtc = new Vue({
         }
     },
     methods: {
-        init(event) {
+        /**
+         * 認証されトークンを受け取った後の初期セッション接続
+         * @param {object} event
+         */
+        initConnect(event) {
             this.vonageHelper.token = event.data;
             this.connect();
         },
+        /**
+         * 認証リクエストを送信
+         */
         authRequest() {
             if (this.userName === '') return;
             if (this.vonageOnlySignalHelper.existedModeratorCount > 0) {
@@ -74,6 +89,9 @@ const webrtc = new Vue({
                 window.alert('ホストがセッションに存在しません。');
             }
         },
+        /**
+         * セッションに接続・切断
+         */
         connect() {
             if(this.vonageHelper.isConnected) {
                 this.vonageOnlySignalHelper.sessionConnect();
@@ -83,9 +101,15 @@ const webrtc = new Vue({
                 this.vonageHelper.sessionConnect();
             }
         },
+        /**
+         * 公開・非公開
+         */
         publish() {
             this.vonageHelper.isPublished ? this.vonageHelper.unPublish() : this.vonageHelper.publish()
         },
+        /**
+         * シグナル送信
+         */
         sendSignal() {
             if (this.signalText.type === '' || this.signalText.data === '') return;
             this.vonageHelper.sendSignal(this.signalText.type, this.signalText.data);
