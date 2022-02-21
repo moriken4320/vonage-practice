@@ -54,6 +54,11 @@ const webrtc = new Vue({
         );
         this.vonageOnlySignalHelper.init();
         this.vonageOnlySignalHelper.registerSignalEvent('authRequest', this.setAuthRequests);
+        this.vonageOnlySignalHelper.registerSignalEvent('removeAuthRequest', (event) => {
+            this.authRequests = this.authRequests.filter(function(request) {
+                return request.from.connectionId !== event.data;
+            });
+        });
 
         this.vonageHelper = new VonageHelper(
             '<%= @opentokInfo[:api_key] %>',
@@ -119,6 +124,7 @@ const webrtc = new Vue({
             this.authRequests = this.authRequests.filter(function(request) {
                 return request !== requestInfo;
             });
+            this.vonageOnlySignalHelper.sendSignal('removeAuthRequest', requestInfo.from.connectionId);
         },
         broadcast() {
             const url = this.isBroadcast ? `/campaigns/${'<%= @campaign.id %>'}/stop_broadcast` : `/campaigns/${'<%= @campaign.id %>'}/start_broadcast`
