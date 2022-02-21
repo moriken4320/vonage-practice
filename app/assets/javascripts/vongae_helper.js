@@ -35,7 +35,7 @@ class VonageHelper {
       height: "100%",
       style: {
         audioLevelDisplayMode: "off",
-        archiveStatusDisplayMode: "on",
+        archiveStatusDisplayMode: "off",
         backgroundImageURI: this.videoOffImage, // ビデオが表示されていないときの背景画像
         buttonDisplayMode: "off",
         nameDisplayMode: "on",

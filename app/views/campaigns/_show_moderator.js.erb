@@ -12,7 +12,7 @@ const webrtc = new Vue({
         authRequests: [],
         signalTarget: null,
         isBroadcast: false,
-        isRecording: false,
+        isRecorded: false,
     },
     computed: {
         connectButtonText() {
@@ -30,6 +30,9 @@ const webrtc = new Vue({
         broadcastButtonText() {
             return this.isBroadcast ? 'stop broadcast' : 'start broadcast'
         },
+        recordingButtonText() {
+            return this.isRecorded ? 'stop recording' : 'start recording'
+        },
     },
     watch: {
         vonageHelper: {
@@ -40,7 +43,8 @@ const webrtc = new Vue({
         },
     },
     created() {
-        '<%= @campaign.status %>' === '1' ? this.isBroadcast = true : this.isBroadcast = false
+        this.isBroadcast = '<%= @campaign.status %>' === '1';
+        this.isRecorded = '<%= @campaign.is_recorded %>' === 'true';
 
         this.vonageOnlySignalHelper = new VonageHelper(
             '<%= @opentokInfo[:api_key] %>',
@@ -123,6 +127,12 @@ const webrtc = new Vue({
                 const isBroadcastText = this.isBroadcast ? 'true' : 'false';
                 this.vonageOnlySignalHelper.sendSignal('broadcast', isBroadcastText);
                 this.vonageHelper.sendSignal('broadcast', isBroadcastText);
+            });
+        },
+        recording() {
+            const url = this.isRecorded ? `/campaigns/${'<%= @campaign.id %>'}/stop_recording` : `/campaigns/${'<%= @campaign.id %>'}/start_recording`
+            window.axios.get(url).then((response) => {
+                this.isRecorded = response.data;
             });
         },
     },

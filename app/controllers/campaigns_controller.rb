@@ -87,17 +87,16 @@ class CampaignsController < ApplicationController
     end
     def start_recording
         VonageService.start_recording(@campaign.session_id)
-        render json: true
+        @campaign.is_recorded = true
+        @campaign.save
+        render json: @campaign.is_recorded
     end
     def stop_recording
         VonageService.stop_recording(@campaign.session_id)
-        render json: false
+        @campaign.is_recorded = false
+        @campaign.save
+        render json: @campaign.is_recorded
     end
-    def get_recording_status
-        archive_id = VonageService.find_starting_archive(@campaign.session_id)
-        render json: !archive_id.nil?
-    end
-
 
     private
 

@@ -13,6 +13,7 @@
                 <button @click="vonageHelper.setAudioEnabled(!vonageHelper.enableAudio)">{{ audioButtonText }}</button>
                 <button @click="vonageHelper.setVideoEnabled(!vonageHelper.enableVideo)">{{ videoButtonText }}</button>
                 <button @click="vonageHelper.startScreenShare()" v-if="vonageHelper.isPublished">screen share</button>
+                <button @click="recording" v-if="vonageHelper.isPublished">{{ recordingButtonText }}</button>
             </div>
             <div>
                 <select @change="vonageHelper.setAudioSource(event.target.value)">
