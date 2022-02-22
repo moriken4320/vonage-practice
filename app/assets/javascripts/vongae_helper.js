@@ -1,9 +1,10 @@
 class VonageHelper {
-  constructor(apiKey, sessionId, token, isOnlySignal = false) {
+  constructor(apiKey, sessionId, token, isOnlySignal = false, sessionDisconnectFunction = null) {
     this.apiKey = apiKey;
     this.sessionId = sessionId;
     this.token = token;
     this.isOnlySignal = isOnlySignal;
+    this.sessionDisconnectFunction = sessionDisconnectFunction;
     this.videoTagId = "videos";
     this.audioOffImage = null;
     this.videoOffImage = null;
@@ -192,10 +193,10 @@ class VonageHelper {
           function (event) {
             this.#debugLog("session sessionDisconnected:", event);
             this.isConnected = false;
-            if (this.isOnlySignal) return;
             if (this.isPublished) this.unPublish();
+            this.subscribeObjs = [];
             this.setName(null);
-            this.initPublisher();
+            if (this.sessionDisconnectFunction) this.sessionDisconnectFunction();
           },
           this
         )

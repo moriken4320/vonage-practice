@@ -70,7 +70,12 @@ const webrtc = new Vue({
         this.vonageHelper = new VonageHelper(
             '<%= @opentokInfo[:api_key] %>',
             '<%= @campaign.session_id %>',
-            ''
+            '',
+            false,
+            () => {
+                this.authRequests = [];
+                this.vonageHelper.initPublisher();
+            },
         );
         this.vonageHelper.init();
         this.vonageHelper.initPublisher();
