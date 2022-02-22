@@ -7,7 +7,7 @@ class VonageHelper {
     this.videoTagId = "videos";
     this.audioOffImage = null;
     this.videoOffImage = null;
-    this.userName = "";
+    this.userName = null;
     this.existedModeratorCount = 0;
 
     // デバイス系
@@ -21,8 +21,8 @@ class VonageHelper {
     this.isScreenSupported = false;
     this.isConnected = false;
     this.isPublished = false;
-    this.enableVideo = true;
     this.enableAudio = true;
+    this.enableVideo = true;
     this.isScreenShared = false;
     this.isError = false;
 
@@ -342,6 +342,13 @@ class VonageHelper {
   async initPublisher() {
     return new Promise((resolve) => {
       if (this.publisherObj) this.publisherObj.destroy();
+
+      const option = {
+        publishAudio: this.enableAudio,
+        publishVideo: this.enableVideo,
+      }
+      $.extend(this.videoOpts, option);
+
       this.publisherObj = OT.initPublisher(
         this.videoTagId,
         this.videoOpts,
