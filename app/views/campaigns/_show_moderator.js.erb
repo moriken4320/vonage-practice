@@ -72,9 +72,16 @@ const webrtc = new Vue({
             '<%= @campaign.session_id %>',
             '',
             false,
-            () => {
-                this.authRequests = [];
-                this.vonageHelper.initPublisher();
+            {
+                disConnectedFunction: () => {
+                    this.authRequests = [];
+                },
+                archiveStartedFunction: () => {
+                    window.alert('録画を開始しました。');
+                },
+                archiveStoppedFunction: () => {
+                    window.alert('録画を停止しました。');
+                },
             },
         );
         this.vonageHelper.init();
@@ -180,8 +187,6 @@ const webrtc = new Vue({
             const url = this.isRecorded ? `/campaigns/${'<%= @campaign.id %>'}/stop_recording` : `/campaigns/${'<%= @campaign.id %>'}/start_recording`
             window.axios.get(url).then((response) => {
                 this.isRecorded = response.data;
-                const message = this.isRecorded ? '録画を開始しました' : '録画を停止しました'
-                window.alert(message);
             });
         },
     },

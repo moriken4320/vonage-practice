@@ -35,8 +35,8 @@
             <div id="audio-level"><div></div></div>
             <div v-if="vonageHelper.isConnected">
                 <button @click="connect">{{ connectButtonText }}</button>
-                <button @click="broadcast">{{ broadcastButtonText }}</button>
                 <button @click="vonageHelper.startScreenShare()" v-if="vonageHelper.isPublished">screen share</button>
+                <button @click="broadcast">{{ broadcastButtonText }}</button>
                 <button @click="recording" v-if="vonageHelper.isPublished">{{ recordingButtonText }}</button>
             </div>
         </div>

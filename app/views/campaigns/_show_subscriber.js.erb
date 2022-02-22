@@ -54,6 +54,7 @@ const webrtc = new Vue({
             '<%= @opentokInfo[:api_key] %>',
             '<%= @campaign.session_id %>',
             '',
+            true
         );
         this.vonageHelper.init();
         // signal:broadcastイベントを登録

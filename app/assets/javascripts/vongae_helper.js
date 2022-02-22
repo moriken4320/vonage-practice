@@ -1,10 +1,15 @@
 class VonageHelper {
-  constructor(apiKey, sessionId, token, isOnlySignal = false, sessionDisconnectFunction = null) {
+  constructor(apiKey, sessionId, token, isOnlySubscribe, events = {}) {
     this.apiKey = apiKey;
     this.sessionId = sessionId;
     this.token = token;
-    this.isOnlySignal = isOnlySignal;
-    this.sessionDisconnectFunction = sessionDisconnectFunction;
+    this.isOnlySubscribe = isOnlySubscribe;
+    this.events = {
+      disConnectedFunction: ()=>{},
+      archiveStartedFunction: ()=>{},
+      archiveStoppedFunction: ()=>{},
+    };
+    $.extend(this.events, events);
     this.videoTagId = "videos";
     this.audioOffImage = null;
     this.videoOffImage = null;
@@ -133,6 +138,7 @@ class VonageHelper {
           "archiveStarted",
           function (event) {
             this.#debugLog("session archiveStarted:", event);
+            this.events.archiveStartedFunction();
           },
           this
         )
@@ -141,6 +147,7 @@ class VonageHelper {
           "archiveStopped",
           function (event) {
             this.#debugLog("session archiveStopped:", event);
+            this.events.archiveStoppedFunction();
           },
           this
         )
@@ -179,8 +186,7 @@ class VonageHelper {
           function (event) {
             this.#debugLog("session sessionConnected:", event);
             this.isConnected = true;
-            const isSubscriberRole = event.target.connection.permissions.publish === 0;
-            if (isSubscriberRole || this.isOnlySignal) return;
+            if (this.isOnlySubscribe) return;
             const userName = event.target.connection.data;
             this.setName(userName);
             this.initPublisher();
@@ -195,8 +201,10 @@ class VonageHelper {
             this.isConnected = false;
             if (this.isPublished) this.unPublish();
             this.subscribeObjs = [];
+            if (this.isOnlySubscribe) return;
             this.setName(null);
-            if (this.sessionDisconnectFunction) this.sessionDisconnectFunction();
+            this.initPublisher();
+            this.events.disConnectedFunction();
           },
           this
         )

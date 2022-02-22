@@ -52,8 +52,13 @@ const webrtc = new Vue({
             '<%= @campaign.session_id %>',
             '',
             false,
-            () => {
-                this.vonageHelper.initPublisher();
+            {
+                archiveStartedFunction: () => {
+                    window.alert('録画を開始しました。');
+                },
+                archiveStoppedFunction: () => {
+                    window.alert('録画を停止しました。');
+                },
             },
         );
         this.vonageHelper.init();
