@@ -17,11 +17,15 @@ class VonageHelper {
     this.userName = null;
     this.existedModeratorCount = 0;
 
-    // デバイス系
+    // 入力デバイス系
     this.audioDeviceList = [];
     this.videoDeviceList = [];
     this.selectedAudioDeviceId = null;
     this.selectedVideoDeviceId = null;
+
+    // 出力デバイス系
+    this.audioOutputDeviceList = [];
+    this.selectedAudioOutputDeviceId = null;
 
     // フラグ系
     this.isSupported = false;
@@ -32,6 +36,7 @@ class VonageHelper {
     this.enableVideo = true;
     this.isScreenShared = false;
     this.isError = false;
+    this.isDeviceUpdated = false;
 
     // vonage関連のオブジェクト
     this.sessionObj = null;
@@ -626,10 +631,29 @@ class VonageHelper {
   }
 
   /**
+   * スピーカーデバイスの取得
+   */
+  async getAudioOutputDevices() {
+    await OT.getAudioOutputDevices().then((audioOutputDeviceList) => {
+      this.audioOutputDeviceList = audioOutputDeviceList.filter(
+        (device) => device.deviceId != "default"
+      );
+      this.#debugLog("audioOutputList:", this.audioOutputDeviceList);
+      this.selectedAudioOutputDeviceId
+          ? null
+          : (this.selectedAudioOutputDeviceId = this.audioOutputDeviceList[0].deviceId);
+      this.#debugLog("selectedAudioOutputDeviceId:", this.selectedAudioOutputDeviceId);
+    });
+  }
+
+  /**
    * デバイス更新
    */
   async deviceUpdated() {
+    if (this.isDeviceUpdated) return;
+    this.isDeviceUpdated = true;
     await this.getDevices();
+    await this.getAudioOutputDevices();
     if (
       !this.audioDeviceList.some(
         (device) => device.deviceId === this.selectedAudioDeviceId
@@ -648,6 +672,16 @@ class VonageHelper {
     } else {
       this.setVideoSource(this.selectedVideoDeviceId);
     }
+    if (
+      !this.audioOutputDeviceList.some(
+        (device) => device.deviceId === this.selectedAudioOutputDeviceId
+      )
+    ) {
+      this.setAudioOutputDevice(this.audioOutputDeviceList[0].deviceId);
+    } else {
+      this.setAudioOutputDevice(this.selectedAudioOutputDeviceId);
+    }
+    this.isDeviceUpdated = false;
   }
 
   /**
@@ -670,6 +704,15 @@ class VonageHelper {
     this.publisherObj.setVideoSource(this.selectedVideoDeviceId);
     this.#debugLog("setVideoSource:", this.selectedVideoDeviceId);
     $.extend(this.videoOpts, { videoSource: this.selectedVideoDeviceId });
+  }
+
+  /**
+   * スピーカーソースの変更
+   */
+   setAudioOutputDevice(audioOutputDeviceId) {
+    this.selectedAudioOutputDeviceId = audioOutputDeviceId;
+    OT.setAudioOutputDevice(this.selectedAudioOutputDeviceId);
+    this.#debugLog("setAudioOutputDevice:", this.selectedAudioOutputDeviceId);
   }
 
   /**
