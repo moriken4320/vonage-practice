@@ -3,15 +3,17 @@
 <p>セッションID：<%= @campaign.session_id %></p>
 
 <div id="publisher-wrapper">
-    <div v-show="vonageHelper.isConnected" id="video-wrapper">
+    <div  v-if="!vonageHelper.isConnected" id="auth-wrapper">
+        <input type="text" id="user-name" v-model="userName" placeholder="名前を入力">
+        <button @click="authRequest">入室リクエストを送信</button>
+    </div>
+
+    <div id="video-wrapper">
         <div id="videos"></div>
         <div id="user-interface">
             <div>
-                <button @click="connect">{{ connectButtonText }}</button>
-                <button @click="publish" v-if="vonageHelper.isConnected">{{ publishButtonText }}</button>
                 <button @click="vonageHelper.setAudioEnabled(!vonageHelper.enableAudio)">{{ audioButtonText }}</button>
                 <button @click="vonageHelper.setVideoEnabled(!vonageHelper.enableVideo)">{{ videoButtonText }}</button>
-                <button @click="vonageHelper.startScreenShare()" v-if="vonageHelper.isPublished">screen share</button>
             </div>
             <div>
                 <select @change="vonageHelper.setAudioSource(event.target.value)">
@@ -31,9 +33,11 @@
                     </option>
                 </select>
             </div>
-        </div>
-        <div id="information">
             <div id="audio-level"><div></div></div>
+            <div v-if="vonageHelper.isConnected">
+                <button @click="connect">{{ connectButtonText }}</button>
+                <button @click="vonageHelper.startScreenShare()" v-if="vonageHelper.isPublished">screen share</button>
+            </div>
         </div>
         <div id="message-area" v-if="vonageHelper.isConnected">
             <div style="font-weight: bold;">シグナル</div>
@@ -44,11 +48,6 @@
             </div>
             <div v-for="signal in vonageHelper.signalObj">type: {{ signal.type }}, data: {{ signal.data }}</div>
         </div>
-    </div>
-
-    <div  v-show="!vonageHelper.isConnected" id="auth-wrapper">
-        <input type="text" id="user-name" v-model="userName" placeholder="名前を入力">
-        <button @click="authRequest">入室リクエストを送信</button>
     </div>
 </div>
 

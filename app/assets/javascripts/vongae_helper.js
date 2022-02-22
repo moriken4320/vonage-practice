@@ -192,7 +192,10 @@ class VonageHelper {
           function (event) {
             this.#debugLog("session sessionDisconnected:", event);
             this.isConnected = false;
+            if (this.isOnlySignal) return;
             if (this.isPublished) this.unPublish();
+            this.setName(null);
+            this.initPublisher();
           },
           this
         )

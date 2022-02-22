@@ -15,10 +15,6 @@ const webrtc = new Vue({
         connectButtonText() {
             return this.vonageHelper?.isConnected ? 'dis connect' : 'connect'
         },
-        // 公開・非公開ボタンテキスト
-        publishButtonText() {
-            return this.vonageHelper?.isPublished ? 'stop publish' : 'start publish'
-        },
         // 音声ON/OFFボタンテキスト
         audioButtonText() {
             return this.vonageHelper?.enableAudio ? 'stop audio' : 'start audio'
@@ -57,6 +53,7 @@ const webrtc = new Vue({
             ''
         );
         this.vonageHelper.init();
+        this.vonageHelper.initPublisher();
     },
     mounted() {
         // オーディオレベルを取得
@@ -100,12 +97,6 @@ const webrtc = new Vue({
                 this.vonageOnlySignalHelper.sessionDisconnect();
                 this.vonageHelper.sessionConnect();
             }
-        },
-        /**
-         * 公開・非公開
-         */
-        publish() {
-            this.vonageHelper.isPublished ? this.vonageHelper.unPublish() : this.vonageHelper.publish()
         },
         /**
          * シグナル送信
