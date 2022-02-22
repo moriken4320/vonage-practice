@@ -86,7 +86,10 @@ class CampaignsController < ApplicationController
         render json: false
     end
     def start_recording
-        VonageService.start_recording(@campaign.session_id)
+        VonageService.start_recording(@campaign.session_id, {
+            type: :bestFit,
+            screenshareType: :verticalPresentation,
+        })
         @campaign.is_recorded = true
         @campaign.save
         render json: @campaign.is_recorded

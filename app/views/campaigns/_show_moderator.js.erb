@@ -184,6 +184,8 @@ const webrtc = new Vue({
             const url = this.isRecorded ? `/campaigns/${'<%= @campaign.id %>'}/stop_recording` : `/campaigns/${'<%= @campaign.id %>'}/start_recording`
             window.axios.get(url).then((response) => {
                 this.isRecorded = response.data;
+                const message = this.isRecorded ? '録画を開始しました' : '録画を停止しました'
+                window.alert(message);
             });
         },
     },
