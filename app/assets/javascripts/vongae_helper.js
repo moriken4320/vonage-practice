@@ -11,6 +11,7 @@ class VonageHelper {
     };
     $.extend(this.events, events);
     this.videoTagId = "videos";
+    this.screenTagId = "screen";
     this.audioOffImage = null;
     this.videoOffImage = null;
     this.userName = null;
@@ -243,7 +244,7 @@ class VonageHelper {
           function (event) {
             this.#debugLog("session streamCreated:", event);
             const videoType = event.stream.videoType;
-            const subscribe = this.subscribe(event.stream);
+            const subscribe = this.subscribe(event.stream, videoType);
             if (videoType === "screen") {
               this.stopScreenShare();
               this.subscribeScreenObjs = subscribe;
@@ -487,10 +488,11 @@ class VonageHelper {
   /**
    * サブスクライブ
    */
-  subscribe(stream) {
+  subscribe(stream, videoType) {
+    const targetElement = videoType === "screen" ? this.screenTagId : this.videoTagId;
     return (
       this.sessionObj
-        .subscribe(stream, this.videoTagId, this.subscribeOpts, (error) => {
+        .subscribe(stream, targetElement, this.subscribeOpts, (error) => {
           if (error) this.#errorLog("subscribe error", error);
         })
         // ブラウザの自動再生ポリシーのためにサブスクライバーのオーディオがブロックされたときにディスパッチ
@@ -715,7 +717,7 @@ class VonageHelper {
     if (this.isScreenShared) this.stopScreenShare();
 
     this.screenPublisherObj = OT.initPublisher(
-      this.videoTagId,
+      this.screenTagId,
       this.screenOpts,
       (error) => {
         if (error) {

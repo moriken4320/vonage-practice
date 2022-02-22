@@ -4,7 +4,10 @@
 
 <div id="subscriber-wrapper">
     <div id="video-wrapper">
-        <div id="videos"></div>
+        <div>
+            <div id="videos"></div>
+            <div id="screen"></div>
+        </div>
         <div id="user-interface">
             <div v-if="isBroadcast">
                 <div v-if="!vonageHelper.isConnected" style="font-weight: bold;">配信が開始しています。</div>

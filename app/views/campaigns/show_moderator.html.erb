@@ -8,7 +8,10 @@
         <button @click="join">入室</button>
     </div>
     <div id="video-wrapper">
-        <div id="videos"></div>
+        <div>
+            <div id="videos"></div>
+            <div id="screen"></div>
+        </div>
         <div id="user-interface">
             <div>
                 <button @click="vonageHelper.setAudioEnabled(!vonageHelper.enableAudio)">{{ audioButtonText }}</button>
