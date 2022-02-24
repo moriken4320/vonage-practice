@@ -222,7 +222,7 @@ class VonageHelper {
             if (this.isOnlySubscribe) return;
             this.setName(null);
             this.initPublisher();
-            this.events.disConnectedFunction();
+            this.events.disConnectedFunction(event);
           },
           this
         )
@@ -340,6 +340,18 @@ class VonageHelper {
   sessionDisconnect() {
     if (this.sessionObj) {
       this.sessionObj.disconnect();
+    }
+  }
+
+  /**
+   * moderatorによる強制session切断処理
+   * @param {Connection} connection
+   */
+  sessionForceDisconnect(connection) {
+    if (this.sessionObj) {
+      this.sessionObj.forceDisconnect(connection, (error) => {
+        if (error) this.#errorLog("session force disconnect error:", error);
+      });
     }
   }
 

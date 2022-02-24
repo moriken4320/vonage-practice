@@ -53,6 +53,11 @@ const webrtc = new Vue({
             '',
             false,
             {
+                disConnectedFunction: (event) => {
+                    if (event.reason === 'forceDisconnected') {
+                        this.vonageOnlySignalHelper.sessionConnect();
+                    }
+                },
                 archiveStartedFunction: () => {
                     window.alert('録画を開始しました。');
                 },
