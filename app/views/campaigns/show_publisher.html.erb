@@ -56,6 +56,15 @@
                 <button @click="vonageHelper.startScreenShare()" v-if="vonageHelper.isPublished">screen share</button>
             </div>
         </div>
+        <div id="panelist-area" v-if="vonageHelper.isConnected">
+            <div style="font-weight: bold;">パネリスト</div>
+            <div v-for="subscriber in vonageHelper.subscribeObjs">
+                <label>
+                    <input type="radio" name="signal_target" :value="subscriber.stream.connection" v-model="signalText['to']">
+                    <span>id: {{ subscriber.stream.connection.id }} , name: {{ subscriber.stream.connection.data }}</span>
+                </label>
+            </div>
+        </div>
         <div id="message-area" v-if="vonageHelper.isConnected">
             <div style="font-weight: bold;">シグナル</div>
             <div>
