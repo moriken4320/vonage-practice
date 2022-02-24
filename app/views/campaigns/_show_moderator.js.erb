@@ -13,6 +13,7 @@ const webrtc = new Vue({
         authRequests: [],  // パネリストからの認証リクエストリスト
         isBroadcast: false,  // 視聴者へ向けて配信しているかどうか
         isRecorded: false,  // 録画しているかどうか
+        isMonitorRole: false,  // モニターロールとして接続するかどうか
     },
     computed: {
         // 接続・切断ボタンテキスト
@@ -77,10 +78,10 @@ const webrtc = new Vue({
                     this.authRequests = [];
                 },
                 archiveStartedFunction: () => {
-                    window.alert('録画を開始しました。');
+                    console.log('録画を開始しました。');
                 },
                 archiveStoppedFunction: () => {
-                    window.alert('録画を停止しました。');
+                    console.log('録画を停止しました。');
                 },
             },
         );
@@ -114,7 +115,9 @@ const webrtc = new Vue({
          * 指定した名前でセッションに接続
          */
         join() {
-            if (this.userName === '') return;
+            if (this.userName === '' && !this.isMonitorRole) return;
+
+            this.vonageHelper.setOnlySubscribe(this.isMonitorRole);
             const url = `/campaigns/${'<%= @campaign.id %>'}/generate_moderator_token`;
             Utility.getToken(url, this.userName, (token) => {
                 // シグナル専用インスタンスでセッションに接続

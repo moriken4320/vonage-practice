@@ -112,6 +112,18 @@ class VonageHelper {
   }
 
   /**
+   * isOnlySubscribeを変更
+   * @param {boolean} bool
+   */
+  setOnlySubscribe(bool) {
+    this.isOnlySubscribe = bool;
+    if (this.isOnlySubscribe) {
+      if (this.publisherObj) this.publisherObj.destroy();
+      this.publisherObj = null;
+    }
+  }
+
+  /**
    * OTの初期設定
    */
   initOT() {

@@ -4,21 +4,22 @@
 
 <div id="moderator-wrapper">
     <div v-if="!vonageHelper.isConnected" id="join-wrapper">
-        <input type="text" id="user-name" v-model="userName" placeholder="名前を入力">
-        <button @click="join">入室</button>
+        <p><label><input type="checkbox" v-model="isMonitorRole">モニターとして入室</label></p>
+        <p><input v-show="!isMonitorRole" type="text" id="user-name" v-model="userName" placeholder="名前を入力"></p>
+        <p><button @click="join">入室</button></p>
     </div>
     <div id="video-wrapper">
-        <div>
+        <div v-show="vonageHelper.isConnected || !isMonitorRole">
             <div id="videos"></div>
             <div id="screen"></div>
         </div>
         <div id="user-interface">
-            <div>
+            <div v-show="!isMonitorRole">
                 <button @click="vonageHelper.setAudioEnabled(!vonageHelper.enableAudio)">{{ audioButtonText }}</button>
                 <button @click="vonageHelper.setVideoEnabled(!vonageHelper.enableVideo)">{{ videoButtonText }}</button>
             </div>
             <div id="device-select">
-                <div>マイク：
+                <div v-show="!isMonitorRole">マイク：
                     <select @change="vonageHelper.setAudioSource(event.target.value)">
                         <option
                         v-for="audioDevice in vonageHelper.audioDeviceList"
@@ -28,7 +29,7 @@
                         </option>
                     </select>
                 </div>
-                <div>カメラ：
+                <div v-show="!isMonitorRole">カメラ：
                     <select @change="vonageHelper.setVideoSource(event.target.value)">
                         <option
                         v-for="videoDevice in vonageHelper.videoDeviceList"
@@ -49,12 +50,12 @@
                     </select>
                 </div>
             </div>
-            <div id="audio-level"><div></div></div>
+            <div v-show="!isMonitorRole" id="audio-level"><div></div></div>
             <div v-if="vonageHelper.isConnected">
                 <button @click="connect">{{ connectButtonText }}</button>
-                <button @click="vonageHelper.startScreenShare()" v-if="vonageHelper.isPublished">screen share</button>
+                <button @click="vonageHelper.startScreenShare()" v-if="vonageHelper.isPublished && !isMonitorRole">screen share</button>
+                <button @click="recording">{{ recordingButtonText }}</button>
                 <button @click="broadcast">{{ broadcastButtonText }}</button>
-                <button @click="recording" v-if="vonageHelper.isPublished">{{ recordingButtonText }}</button>
             </div>
         </div>
         <div id="request-area" v-if="vonageHelper.isConnected">
