@@ -31,6 +31,7 @@ module VonageService
     # 録画開始
     #
     # @params [String] vonage session_id
+    # @params [Hash] layout option
     def start_recording(session_id, layout = {})
       generate_opentok.archives.create(session_id, {
                                          name: session_id,
@@ -45,6 +46,15 @@ module VonageService
     def stop_recording(session_id)
       archive_id = find_starting_archive(session_id)
       generate_opentok.archives.stop_by_id(archive_id) unless archive_id.nil?
+    end
+
+    # 録画のレイアウトを変更
+    #
+    # @params [String] vonage session_id
+    # @params [Hash] layout options
+    def change_archive_layout(session_id, options = {type: :bestFit})
+      archive_id = find_starting_archive(session_id)
+      generate_opentok.archives.layout(archive_id, options) unless archive_id.nil?
     end
 
     # 録画ファイルのs3保存パス取得
@@ -62,6 +72,7 @@ module VonageService
 
       archive_paths
     end
+
 
     private
 
