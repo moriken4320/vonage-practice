@@ -114,6 +114,7 @@ class VonageHelper {
         packetsLostRate: "ー",
         frameRate: "ー",
       },
+      networkStatus: "Disconnect",
     },
     this.statsInterval = null,
 
@@ -944,14 +945,57 @@ class VonageHelper {
         $.extend(this.preStats.audio, statsArray[0].stats.audio);
         $.extend(this.preStats.video, statsArray[0].stats.video);
 
+        let isExcellent = true;
+        let isAcceptable = true;
+        let isBad = true;
+        switch(true) {
+          case this.enableVideo:
+            if(this.publisherObj.videoWidth() >= 1200) {
+              isExcellent = videoStats.bitRate >= 1000 && videoStats.packetsLostRate <= 0.5;
+              isAcceptable = videoStats.bitRate >= 350 && videoStats.packetsLostRate <= 3;
+            } else if(this.publisherObj.videoWidth() >= 600) {
+              isExcellent = videoStats.bitRate >= 600 && videoStats.packetsLostRate <= 0.5;
+              isAcceptable = videoStats.bitRate >= 250 && videoStats.packetsLostRate <= 3;
+            } else {
+              isExcellent = videoStats.bitRate >= 300 && videoStats.packetsLostRate <= 0.5;
+              isAcceptable = videoStats.bitRate >= 150 && videoStats.packetsLostRate <= 3;
+            }
+            break;
+          case this.enableAudio:
+            isExcellent = audioStats.bitRate >= 30 && audioStats.packetsLostRate <= 0.5;
+            isAcceptable = audioStats.bitRate >= 25 && audioStats.packetsLostRate <= 5;
+            break;
+          default:
+            isExcellent = false;
+            isAcceptable = false;
+            isBad = false;
+        }
+
+        let networkQuality;
+        switch(true) {
+          case isExcellent:
+            networkQuality = 'Excellent';
+            break;
+          case isAcceptable:
+            networkQuality = 'Acceptable';
+            break;
+          case isBad:
+            networkQuality = 'Bad';
+            break;
+          default:
+            networkQuality = 'Off';
+        }
+
         const stats = {
           audio: audioStats,
           video: videoStats,
+          networkStatus: networkQuality,
         };
         $.extend(this.displayStatus, stats);
       });
     }, 1000);
   }
+
   /**
    * 配信ステータス取得終了処理
    */
@@ -968,6 +1012,7 @@ class VonageHelper {
         packetsLostRate: "ー",
         frameRate: "ー",
       },
+      networkStatus: "Disconnect",
     };
   }
 

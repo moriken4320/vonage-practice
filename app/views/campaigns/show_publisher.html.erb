@@ -49,6 +49,18 @@
                         </option>
                     </select>
                 </div>
+                <div>
+                    <div>品質ステータス：{{ vonageHelper.displayStatus.networkStatus }}</div>
+                    <div>
+                        <div>オーディオビットレート：{{ vonageHelper.displayStatus.audio.bitRate }}</div>
+                        <div>オーディオパケロス率：{{ vonageHelper.displayStatus.audio.packetsLostRate }}</div>
+                    </div>
+                    <div>
+                        <div>ビデオビットレート：{{ vonageHelper.displayStatus.video.bitRate }}</div>
+                        <div>ビデオパケロス率：{{ vonageHelper.displayStatus.video.packetsLostRate }}</div>
+                        <div>フレームレート：{{ vonageHelper.displayStatus.video.frameRate }}</div>
+                    </div>
+                </div>
             </div>
             <div id="audio-level"><div></div></div>
             <div v-if="vonageHelper.isConnected">
