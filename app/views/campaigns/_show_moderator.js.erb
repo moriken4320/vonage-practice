@@ -86,6 +86,15 @@ const webrtc = new Vue({
             },
         );
         this.vonageHelper.init();
+        // signal:authRequestイベントを登録
+        this.vonageHelper.registerSignalEvent('authRequest', this.setAuthRequests);
+        // signal:removeAuthRequestイベントを登録
+        this.vonageHelper.registerSignalEvent('removeAuthRequest', (event) => {
+            // 受信した情報と一致するパネリストからの認証リクエストリスト内の情報を削除
+            this.authRequests = this.authRequests.filter(function(request) {
+                return request.from.connectionId !== event.data;
+            });
+        });
         this.vonageHelper.initPublisher();
     },
     mounted() {
@@ -158,6 +167,7 @@ const webrtc = new Vue({
             Utility.getToken(url, requestInfo.data, (token) => {
                 // 取得したトークンを認証リクエスト送信者に送信
                 this.vonageOnlySignalHelper.sendSignal('receiveToken', token, requestInfo.from);
+                this.vonageHelper.sendSignal('receiveToken', token, requestInfo.from);
                 this.removeRequest(requestInfo);
             });
         },

@@ -217,12 +217,12 @@ class VonageHelper {
           function (event) {
             this.#debugLog("session sessionDisconnected:", event);
             this.isConnected = false;
-            if (this.isPublished) this.unPublish();
+            this.unPublish();
             this.subscribeObjs = [];
+            this.events.disConnectedFunction(event);
             if (this.isOnlySubscribe) return;
             this.setName(null);
             this.initPublisher();
-            this.events.disConnectedFunction(event);
           },
           this
         )

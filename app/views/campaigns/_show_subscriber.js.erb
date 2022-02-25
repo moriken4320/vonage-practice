@@ -14,7 +14,14 @@ const webrtc = new Vue({
     computed: {
         // 接続・切断ボタンテキスト
         connectButtonText() {
-            return this.vonageHelper.isConnected ? 'dis connect' : 'connect'
+            switch(true) {
+                case this.vonageHelper.isConnected && this.vonageHelper.isPublished:
+                    return 'back to subscriber';
+                case this.vonageHelper.isConnected:
+                    return 'dis connect';
+                default:
+                    return 'connect';
+            }
         },
         // 音声ON/OFFボタンテキスト
         audioButtonText() {
@@ -54,11 +61,23 @@ const webrtc = new Vue({
             '<%= @opentokInfo[:api_key] %>',
             '<%= @campaign.session_id %>',
             '',
-            true
+            true,
+            {
+                disConnectedFunction: (event) => {
+                    if (!this.vonageHelper.isOnlySubscribe)  {
+                        this.vonageHelper.setOnlySubscribe(true);
+                        setTimeout(() => {
+                            this.connect();
+                        }, 1000);
+                    }
+                },
+            }
         );
         this.vonageHelper.init();
         // signal:broadcastイベントを登録
         this.vonageHelper.registerSignalEvent('broadcast', this.setBroadcast);
+        // signal:receiveTokenイベントを登録
+        this.vonageHelper.registerSignalEvent('receiveToken', this.connectAsPublisher);
     },
     mounted() {
         // オーディオレベルを取得
@@ -107,6 +126,29 @@ const webrtc = new Vue({
             this.vonageHelper.sendSignal(this.signalText.type, this.signalText.data);
             this.signalText.type = '';
             this.signalText.data = '';
+        },
+        /**
+         * 挙手
+         */
+        handsUp() {
+            if (this.userName === '') return;
+            if (this.vonageHelper.existedModeratorCount > 0) {
+                this.vonageHelper.sendSignal('authRequest', this.userName);
+            } else {
+                window.alert('ホストがセッションに存在しません。');
+            }
+        },
+        /**
+         * 認証されトークンを受け取り、publihserとしてセッション接続
+         * @param {object} event
+         */
+        connectAsPublisher(event) {
+            this.vonageHelper.sessionDisconnect();
+            setTimeout(() => {
+                this.vonageHelper.token = event.data;
+                this.vonageHelper.setOnlySubscribe(false);
+                this.vonageHelper.sessionConnect();
+            }, 1000);
         },
     },
 });
