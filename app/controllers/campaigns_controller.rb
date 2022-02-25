@@ -98,8 +98,9 @@ class CampaignsController < ApplicationController
         render json: @campaign.is_recorded
     end
     def change_archive_layout
+        VonageService.change_stream_layout_class(@campaign.session_id, params[:layoutClass])
         VonageService.change_archive_layout(@campaign.session_id, params[:layout])
-        render json: params[:layout]
+        render json: nil
     end
 
 

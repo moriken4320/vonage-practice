@@ -233,6 +233,7 @@ const webrtc = new Vue({
             const videoType = event.stream.videoType;
             if (videoType !== 'screen') return;
             const url = `/campaigns/${'<%= @campaign.id %>'}/change_archive_layout`;
+
             let archiveLayoutOptions;
             switch (eventName) {
                 case 'streamCreated':
@@ -241,7 +242,27 @@ const webrtc = new Vue({
                 default:
                     archiveLayoutOptions = this.archiveLayoutOptionsWhenBase;
             }
-            window.axios.put(url, {layout: archiveLayoutOptions});
+
+            let screenStreamLayoutClassOptions;
+            switch (eventName) {
+                case 'streamCreated':
+                    screenStreamLayoutClassOptions = {
+                        items: [
+                            {
+                                id: event.stream.id,
+                                layoutClassList: ["focus"]
+                            }
+                        ]
+                    };
+                    break;
+                default:
+                    screenStreamLayoutClassOptions = null;
+            }
+
+            window.axios.put(url, {
+                layout: archiveLayoutOptions,
+                layoutClass: screenStreamLayoutClassOptions
+            });
         },
     },
 });

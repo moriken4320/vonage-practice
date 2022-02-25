@@ -57,6 +57,14 @@ module VonageService
       generate_opentok.archives.layout(archive_id, options) unless archive_id.nil?
     end
 
+    # ストリームの録画レイアウトクラスを変更
+    #
+    # @params [String] vonage session_id
+    # @params [Hash] layout options
+    def change_stream_layout_class(session_id, options)
+      generate_opentok.streams.layout(session_id, options) unless options.nil?
+    end
+
     # 録画ファイルのs3保存パス取得
     # ファイルパス {vonage_api_key}/{archive_id}/archive.mp4
     #
