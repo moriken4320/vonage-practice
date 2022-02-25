@@ -8,8 +8,8 @@
             <div id="videos"></div>
             <div id="screen"></div>
         </div>
-        <div id="user-interface">
-            <div v-if="isBroadcast">
+        <div v-if="isBroadcast">
+            <div id="user-interface">
                 <div>
                     <div v-if="!vonageHelper.isConnected" style="font-weight: bold;">配信が開始しています。</div>
                     <button @click="connect">{{ connectButtonText }}</button>
@@ -18,9 +18,46 @@
                     <input type="text" id="user-name" v-model="userName" placeholder="名前を入力">
                     <button @click="handsUp">挙手</button>
                 </div>
+                <div v-if="vonageHelper.isPublished">
+                    <button @click="vonageHelper.setAudioEnabled(!vonageHelper.enableAudio)">{{ audioButtonText }}</button>
+                    <button @click="vonageHelper.setVideoEnabled(!vonageHelper.enableVideo)">{{ videoButtonText }}</button>
+                </div>
+                <div id="device-select">
+                    <div v-if="vonageHelper.isPublished">マイク：
+                        <select @change="vonageHelper.setAudioSource(event.target.value)">
+                            <option
+                            v-for="audioDevice in vonageHelper.audioDeviceList"
+                            :value="audioDevice.deviceId"
+                            :selected="vonageHelper.selectedAudioDeviceId === audioDevice.deviceId">
+                                {{ audioDevice.label }}
+                            </option>
+                        </select>
+                    </div>
+                    <div v-if="vonageHelper.isPublished">カメラ：
+                        <select @change="vonageHelper.setVideoSource(event.target.value)">
+                            <option
+                            v-for="videoDevice in vonageHelper.videoDeviceList"
+                            :value="videoDevice.deviceId"
+                            :selected="vonageHelper.selectedVideoDeviceId === videoDevice.deviceId">
+                                {{  videoDevice.label }}
+                            </option>
+                        </select>
+                    </div>
+                    <div v-if="vonageHelper.isConnected">スピーカー：
+                        <select @change="vonageHelper.setAudioOutputDevice(event.target.value)">
+                            <option
+                            v-for="audioOutputDevice in vonageHelper.audioOutputDeviceList"
+                            :value="audioOutputDevice.deviceId"
+                            :selected="vonageHelper.selectedAudioOutputDeviceId === audioOutputDevice.deviceId">
+                                {{  audioOutputDevice.label }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div v-show="vonageHelper.isPublished" id="audio-level"><div></div></div>
             </div>
-            <div v-else style="font-weight: bold;">配信が開始されるまでお待ちください。</div>
         </div>
+        <div v-else style="font-weight: bold;">配信が開始されるまでお待ちください。</div>
         <div id="panelist-area" v-if="vonageHelper.isConnected">
             <div style="font-weight: bold;">パネリスト</div>
             <div v-for="subscriber in vonageHelper.subscribeObjs">
