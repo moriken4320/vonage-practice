@@ -5,9 +5,9 @@ class VonageHelper {
     this.token = token;
     this.isOnlySubscribe = isOnlySubscribe;
     this.events = {
-      disConnectedFunction: ()=>{},
-      archiveStartedFunction: ()=>{},
-      archiveStoppedFunction: ()=>{},
+      disConnectedFunction: () => {},
+      archiveStartedFunction: () => {},
+      archiveStoppedFunction: () => {},
     };
     $.extend(this.events, events);
     this.videoTagId = "videos";
@@ -88,6 +88,34 @@ class VonageHelper {
     };
 
     this.audioLevel = 0;
+
+    //1秒前のstats
+    this.preStats = {
+      audio: {
+          bytesSent: 0,
+          packetsLost: 0,
+          packetsSent: 0,
+      },
+      video: {
+          bytesSent: 0,
+          packetsLost: 0,
+          packetsSent: 0,
+          frameRate: 0,
+      },
+    }
+    //表示用stats
+    this.displayStatus = {
+      audio: {
+        bitRate: "ー",
+        packetsLostRate: "ー",
+      },
+      video: {
+        bitRate: "ー",
+        packetsLostRate: "ー",
+        frameRate: "ー",
+      },
+    },
+    this.statsInterval = null,
 
     // 受け取ったsignalを格納するオブジェクト
     this.signalObj = [];
@@ -175,7 +203,8 @@ class VonageHelper {
           "connectionCreated",
           function (event) {
             this.#debugLog("session connectionCreated:", event);
-            const isModerator = event.connection.permissions.forceDisconnect === 1;
+            const isModerator =
+              event.connection.permissions.forceDisconnect === 1;
             if (isModerator) this.existedModeratorCount++;
           },
           this
@@ -185,7 +214,8 @@ class VonageHelper {
           "connectionDestroyed",
           function (event) {
             this.#debugLog("session connectionDestroyed:", event);
-            const isModerator = event.connection.permissions.forceDisconnect === 1;
+            const isModerator =
+              event.connection.permissions.forceDisconnect === 1;
             if (isModerator) this.existedModeratorCount--;
           },
           this
@@ -268,7 +298,8 @@ class VonageHelper {
             } else {
               this.subscribeObjs.push(subscribe);
             }
-            if (this.events.changeArchiveLayout) this.events.changeArchiveLayout("streamCreated", event);
+            if (this.events.changeArchiveLayout)
+              this.events.changeArchiveLayout("streamCreated", event);
           },
           this
         )
@@ -286,7 +317,8 @@ class VonageHelper {
                 return subscriber.stream.id !== streamId;
               });
             }
-            if (this.events.changeArchiveLayout) this.events.changeArchiveLayout("streamDestroyed", event);
+            if (this.events.changeArchiveLayout)
+              this.events.changeArchiveLayout("streamDestroyed", event);
           },
           this
         )
@@ -310,8 +342,8 @@ class VonageHelper {
    * @param {string} type
    * @param {function} callback
    */
-   registerSignalEvent(type, callback = null) {
-     if (!this.sessionObj) return;
+  registerSignalEvent(type, callback = null) {
+    if (!this.sessionObj) return;
     this.sessionObj.on(
       `signal:${type}`,
       function (event) {
@@ -390,7 +422,7 @@ class VonageHelper {
       const option = {
         publishAudio: this.enableAudio,
         publishVideo: this.enableVideo,
-      }
+      };
       $.extend(this.videoOpts, option);
 
       this.publisherObj = OT.initPublisher(
@@ -472,6 +504,7 @@ class VonageHelper {
           function (event) {
             this.#debugLog("initPublisher streamCreated:", event);
             this.isPublished = true;
+            this.startGetStats();
           },
           this
         )
@@ -483,6 +516,7 @@ class VonageHelper {
             this.#debugLog("initPublisher streamDestroyed:", event);
             this.isPublished = false;
             this.stopScreenShare();
+            this.stopGetStats();
           },
           this
         );
@@ -520,7 +554,8 @@ class VonageHelper {
    * サブスクライブ
    */
   subscribe(stream, videoType) {
-    const targetElement = videoType === "screen" ? this.screenTagId : this.videoTagId;
+    const targetElement =
+      videoType === "screen" ? this.screenTagId : this.videoTagId;
     return (
       this.sessionObj
         .subscribe(stream, targetElement, this.subscribeOpts, (error) => {
@@ -666,9 +701,13 @@ class VonageHelper {
       );
       this.#debugLog("audioOutputList:", this.audioOutputDeviceList);
       this.selectedAudioOutputDeviceId
-          ? null
-          : (this.selectedAudioOutputDeviceId = this.audioOutputDeviceList[0].deviceId);
-      this.#debugLog("selectedAudioOutputDeviceId:", this.selectedAudioOutputDeviceId);
+        ? null
+        : (this.selectedAudioOutputDeviceId =
+            this.audioOutputDeviceList[0].deviceId);
+      this.#debugLog(
+        "selectedAudioOutputDeviceId:",
+        this.selectedAudioOutputDeviceId
+      );
     });
   }
 
@@ -735,7 +774,7 @@ class VonageHelper {
   /**
    * スピーカーソースの変更
    */
-   setAudioOutputDevice(audioOutputDeviceId) {
+  setAudioOutputDevice(audioOutputDeviceId) {
     this.selectedAudioOutputDeviceId = audioOutputDeviceId;
     OT.setAudioOutputDevice(this.selectedAudioOutputDeviceId);
     this.#debugLog("setAudioOutputDevice:", this.selectedAudioOutputDeviceId);
@@ -817,7 +856,8 @@ class VonageHelper {
         function (event) {
           this.#debugLog("initPublisher(screen) streamCreated:", event);
           this.isScreenShared = true;
-          if (this.events.changeArchiveLayout) this.events.changeArchiveLayout("streamCreated", event);
+          if (this.events.changeArchiveLayout)
+            this.events.changeArchiveLayout("streamCreated", event);
         },
         this
       )
@@ -827,7 +867,8 @@ class VonageHelper {
         function (event) {
           this.#debugLog("initPublisher(screen) streamDestroyed:", event);
           this.isScreenShared = false;
-          if (this.events.changeArchiveLayout) this.events.changeArchiveLayout("streamDestroyed", event);
+          if (this.events.changeArchiveLayout)
+            this.events.changeArchiveLayout("streamDestroyed", event);
         },
         this
       )
@@ -851,6 +892,83 @@ class VonageHelper {
     if (!this.screenPublisherObj || !this.isScreenShared) return;
     this.screenPublisherObj.destroy();
     this.screenPublisherObj = null;
+  }
+
+  /**
+   * 配信ステータス取得開始処理
+   */
+  startGetStats() {
+    this.statsInterval = setInterval(() => {
+      this.publisherObj.getStats((error, statsArray) => {
+        if (error) this.#errorLog("getStats", error);
+        const audioStats = {
+          bitRate: Math.round(
+            ((statsArray[0].stats.audio.bytesSent -
+              this.preStats.audio.bytesSent) *
+              8) /
+              1000
+          ),
+          packetsLostRate:
+            Math.round(
+              (statsArray[0].stats.audio.packetsLost /
+                (statsArray[0].stats.audio.packetsSent +
+                  statsArray[0].stats.audio.packetsLost)) *
+                100 *
+                1000
+            ) / 1000,
+        };
+        if (!this.enableAudio) audioStats.bitRate = 0;
+
+        const videoStats = {
+          bitRate: Math.round(
+            ((statsArray[0].stats.video.bytesSent -
+              this.preStats.video.bytesSent) *
+              8) /
+              1000
+          ),
+          packetsLostRate:
+            Math.round(
+              (statsArray[0].stats.video.packetsLost /
+                (statsArray[0].stats.video.packetsSent +
+                  statsArray[0].stats.video.packetsLost)) *
+                100 *
+                1000
+            ) / 1000,
+          frameRate: Math.round(statsArray[0].stats.video.frameRate),
+        };
+        if (!this.enableVideo) {
+          videoStats.bitRate = 0;
+          videoStats.frameRate = 0;
+        }
+
+        $.extend(this.preStats.audio, statsArray[0].stats.audio);
+        $.extend(this.preStats.video, statsArray[0].stats.video);
+
+        const stats = {
+          audio: audioStats,
+          video: videoStats,
+        };
+        $.extend(this.displayStatus, stats);
+      });
+    }, 1000);
+  }
+  /**
+   * 配信ステータス取得終了処理
+   */
+  stopGetStats() {
+    clearInterval(this.statsInterval);
+    this.statsInterval = null;
+    this.displayStatus = {
+      audio: {
+        bitRate: "ー",
+        packetsLostRate: "ー",
+      },
+      video: {
+        bitRate: "ー",
+        packetsLostRate: "ー",
+        frameRate: "ー",
+      },
+    };
   }
 
   #debugLog(type = "debug", object = null) {

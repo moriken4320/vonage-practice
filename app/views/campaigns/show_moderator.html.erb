@@ -57,6 +57,17 @@
                 <button @click="recording">{{ recordingButtonText }}</button>
                 <button @click="broadcast">{{ broadcastButtonText }}</button>
             </div>
+            <div>
+                <div>
+                    <div>オーディオビットレート：{{ vonageHelper.displayStatus.audio.bitRate }}</div>
+                    <div>オーディオパケロス率：{{ vonageHelper.displayStatus.audio.packetsLostRate }}</div>
+                </div>
+                <div>
+                    <div>ビデオビットレート：{{ vonageHelper.displayStatus.video.bitRate }}</div>
+                    <div>ビデオパケロス率：{{ vonageHelper.displayStatus.video.packetsLostRate }}</div>
+                    <div>フレームレート：{{ vonageHelper.displayStatus.video.frameRate }}</div>
+                </div>
+            </div>
         </div>
         <div id="request-area" v-if="vonageHelper.isConnected">
             <div style="font-weight: bold;">参加リクエスト</div>
