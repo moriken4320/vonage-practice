@@ -13,6 +13,26 @@ const webrtc = new Vue({
         authRequests: [],  // パネリストからの認証リクエストリスト
         isBroadcast: false,  // 視聴者へ向けて配信しているかどうか
         isRecorded: false,  // 録画しているかどうか
+        archiveLayoutOptionsWhenBase: {  // デフォルトの録画レイアウトオプション
+            type: 'bestFit',
+        },
+        archiveLayoutOptionsWhenScreenSharing: {  // 画面共有中の録画レイアウトオプション
+            type: 'custom',
+            stylesheet: "stream { \
+                float: left; \
+                left: 0px; \
+                clear: left; \
+                width: 10%; \
+                height: 10%; \
+            } \
+            stream.focus { \
+                position: absolute; \
+                top: 0; left: 10%; \
+                margin: 0px; \
+                width: 90%; \
+                height: 100%; \
+            }",
+        },
         isMonitorRole: false,  // モニターロールとして接続するかどうか
     },
     computed: {
@@ -83,6 +103,7 @@ const webrtc = new Vue({
                 archiveStoppedFunction: () => {
                     console.log('録画を停止しました。');
                 },
+                changeArchiveLayout: this.changeArchiveLayout,
             },
         );
         this.vonageHelper.init();
@@ -98,6 +119,8 @@ const webrtc = new Vue({
         this.vonageHelper.initPublisher();
     },
     mounted() {
+        window.axios.defaults.headers.common['X-CSRF-Token'] = $('meta[name="csrf-token"]').attr('content');
+
         // オーディオレベルを取得
         setInterval(() => {
             $("#audio-level > div").width(`${this.vonageHelper.audioLevel * 100}%`);
@@ -198,9 +221,27 @@ const webrtc = new Vue({
          */
         recording() {
             const url = this.isRecorded ? `/campaigns/${'<%= @campaign.id %>'}/stop_recording` : `/campaigns/${'<%= @campaign.id %>'}/start_recording`
-            window.axios.get(url).then((response) => {
+            const archiveLayoutOptions = this.vonageHelper.isScreenShared ? this.archiveLayoutOptionsWhenScreenSharing : this.archiveLayoutOptionsWhenBase;
+            window.axios.put(url, {layout: archiveLayoutOptions}).then((response) => {
                 this.isRecorded = response.data;
             });
+        },
+        /**
+         * 録画のレイアウト変更
+         */
+        changeArchiveLayout(eventName, event) {
+            const videoType = event.stream.videoType;
+            if (videoType !== 'screen') return;
+            const url = `/campaigns/${'<%= @campaign.id %>'}/change_archive_layout`;
+            let archiveLayoutOptions;
+            switch (eventName) {
+                case 'streamCreated':
+                    archiveLayoutOptions = this.archiveLayoutOptionsWhenScreenSharing;
+                    break;
+                default:
+                    archiveLayoutOptions = this.archiveLayoutOptionsWhenBase;
+            }
+            window.axios.put(url, {layout: archiveLayoutOptions});
         },
     },
 });

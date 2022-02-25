@@ -268,6 +268,7 @@ class VonageHelper {
             } else {
               this.subscribeObjs.push(subscribe);
             }
+            if (this.events.changeArchiveLayout) this.events.changeArchiveLayout("streamCreated", event);
           },
           this
         )
@@ -285,6 +286,7 @@ class VonageHelper {
                 return subscriber.stream.id !== streamId;
               });
             }
+            if (this.events.changeArchiveLayout) this.events.changeArchiveLayout("streamDestroyed", event);
           },
           this
         )
@@ -815,6 +817,7 @@ class VonageHelper {
         function (event) {
           this.#debugLog("initPublisher(screen) streamCreated:", event);
           this.isScreenShared = true;
+          if (this.events.changeArchiveLayout) this.events.changeArchiveLayout("streamCreated", event);
         },
         this
       )
@@ -824,6 +827,7 @@ class VonageHelper {
         function (event) {
           this.#debugLog("initPublisher(screen) streamDestroyed:", event);
           this.isScreenShared = false;
+          if (this.events.changeArchiveLayout) this.events.changeArchiveLayout("streamDestroyed", event);
         },
         this
       )

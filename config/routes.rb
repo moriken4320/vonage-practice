@@ -13,8 +13,9 @@ Rails.application.routes.draw do
       get :generate_subscriber_token
       get :start_broadcast
       get :stop_broadcast
-      get :start_recording
-      get :stop_recording
+      put :start_recording
+      put :stop_recording
+      put :change_archive_layout
     end
   end
 end

@@ -52,7 +52,7 @@ module VonageService
     #
     # @params [String] vonage session_id
     # @params [Hash] layout options
-    def change_archive_layout(session_id, options = {type: :bestFit})
+    def change_archive_layout(session_id, options = {type: "bestFit"})
       archive_id = find_starting_archive(session_id)
       generate_opentok.archives.layout(archive_id, options) unless archive_id.nil?
     end
