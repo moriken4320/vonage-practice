@@ -12,6 +12,7 @@
                 <div>
                     <div v-if="!vonageHelper.isConnected" style="font-weight: bold;">配信が開始しています。</div>
                     <button @click="connect">{{ connectButtonText }}</button>
+                    <button v-if="vonageHelper.isConnected" @click="audioMuteAll">{{ audioSubscribeButtonText }}</button>
                 </div>
                 <div v-if="vonageHelper.isConnected && !vonageHelper.isPublished">
                     <input type="text" id="user-name" v-model="userName" placeholder="名前を入力">

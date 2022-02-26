@@ -10,6 +10,7 @@ const webrtc = new Vue({
             data: '',
         },
         isBroadcast: false,  // 視聴者へ向けて配信しているかどうか
+        enabledAudioSubscribe: true,  // 音声をサブスクライブしているかの可否
     },
     computed: {
         // 接続・切断ボタンテキスト
@@ -30,6 +31,10 @@ const webrtc = new Vue({
         // 映像ON/OFFボタンテキスト
         videoButtonText() {
             return this.vonageHelper.enableVideo ? 'stop video' : 'start video'
+        },
+        // 映像ON/OFFボタンテキスト
+        audioSubscribeButtonText() {
+            return this.enabledAudioSubscribe ? 'stop audio subscribe' : 'start audio subscribe'
         },
     },
     watch: {
@@ -153,5 +158,14 @@ const webrtc = new Vue({
                 this.vonageHelper.sessionConnect();
             }, 1000);
         },
+        /**
+         * サブスクライバーの音声を一括ミュート
+         */
+        audioMuteAll() {
+            this.enabledAudioSubscribe = !this.enabledAudioSubscribe
+            this.vonageHelper.subscribeObjs.forEach((subscriber) => {
+                subscriber.subscribeToAudio(this.enabledAudioSubscribe);
+            });
+        }
     },
 });
