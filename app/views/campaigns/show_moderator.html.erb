@@ -86,6 +86,7 @@
                 <label>
                     <input type="radio" name="signal_target" :value="subscriber.stream.connection" v-model="signalText['to']">
                     <span>id: {{ subscriber.stream.connection.id }} , name: {{ subscriber.stream.connection.data }}</span>
+                    <button @click="vonageHelper.forceMuteStream(subscriber.stream)">強制ミュート</button>
                     <button @click="vonageHelper.sessionForceDisconnect(subscriber.stream.connection)">強制退出</button>
                 </label>
             </div>

@@ -391,6 +391,16 @@ class VonageHelper {
   }
 
   /**
+   * moderatorによる強制音声ミュート処理
+   * @param {Stream} stream
+   */
+   forceMuteStream(stream) {
+    if (this.sessionObj) {
+      this.sessionObj.forceMuteStream(stream);
+    }
+  }
+
+  /**
    * signal送信
    * @param {string} type
    * @param {string} data
@@ -496,6 +506,7 @@ class VonageHelper {
           "muteForced",
           function (event) {
             this.#debugLog("initPublisher muteForced:", event);
+            this.enableAudio = false;
           },
           this
         )
