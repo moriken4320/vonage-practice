@@ -1,7 +1,7 @@
 ## 環境構築手順
 1. 以下のコマンドを順に実行
 ```
-$ git clone git@github.com:moriken4320/nexpro-vonage-sample.git
+$ git clone git@github.com:test-moriken-team/nexpro-vonage-sample.git
 $ cd nexpro-vonage-sample
 $ make init
 ```
