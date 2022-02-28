@@ -87,6 +87,7 @@ class VonageHelper {
     };
 
     this.audioLevel = 0;
+    this.speakerFrameTimers = [];
 
     //1秒前のstats
     this.preStats = {
@@ -456,6 +457,7 @@ class VonageHelper {
           } else {
             this.#debugLog("initPublisher success:");
             this.#createAudioOffImage(this.publisherObj.id, this.enableAudio);
+            this.#createSpeakerFrameElement(this.publisherObj.id);
           }
           resolve();
         }
@@ -499,6 +501,7 @@ class VonageHelper {
           "audioLevelUpdated",
           function (event) {
             this.audioLevel = event.audioLevel;
+            this.#changeDisplaySpeakerFrame(event.target.id, event.audioLevel, 0.1);
           },
           this
         )
@@ -590,7 +593,9 @@ class VonageHelper {
         )
         // １秒間に60回(ブラウザによる)ディスパッチ
         // 他人の音声レベルを示すための数値(0.0~1.0)を定期的に送信する
-        .on("audioLevelUpdated", (event) => {}, this)
+        .on("audioLevelUpdated", (event) => {
+          this.#changeDisplaySpeakerFrame(event.target.id, event.audioLevel, 0.01);
+        }, this)
         // ブラウザの自動再生ポリシーのために一時停止した後、サブスクライバーのオーディオのブロックが解除されたときにディスパッチ
         .on(
           "audioUnblocked",
@@ -662,6 +667,7 @@ class VonageHelper {
             this.#debugLog("subscribe videoElementCreated:", event);
 
             this.#createAudioOffImage(event.target.id, event.target.stream.hasAudio);
+            this.#createSpeakerFrameElement(event.target.id);
           },
           this
         )
@@ -1053,7 +1059,39 @@ class VonageHelper {
    * @param {boolean} hasAudio
    */
   #changeDisplayAudioOffImage(targetElementId, hasAudio) {
-    hasAudio ? $(`#${targetElementId} > .audio-off`).hide() : $(`#${targetElementId} > .audio-off`).show();
+    if (hasAudio) {
+      $(`#${targetElementId} > .audio-off`).hide();
+      $(`#${targetElementId} > .speaker-frame`).removeClass('disable');
+    } else {
+      $(`#${targetElementId} > .audio-off`).show();
+      $(`#${targetElementId} > .speaker-frame`).hide();
+      $(`#${targetElementId} > .speaker-frame`).addClass('disable');
+    }
+  }
+  /**
+   * 話者の枠の作成
+   * @param {string} targetElementId
+   */
+  #createSpeakerFrameElement(targetElementId) {
+    const element = $("<div>").addClass("speaker-frame");
+
+    $(`#${targetElementId}`).append(element);
+  }
+  /**
+   * 話者の枠の表示切り替え
+   * @param {string} targetElementId
+   * @param {float} audioLevel
+   * @param {float} threshold
+   */
+  #changeDisplaySpeakerFrame(targetElementId, audioLevel, threshold) {
+    if (audioLevel > threshold) {
+      if (this.speakerFrameTimers[targetElementId]) clearTimeout(this.speakerFrameTimers[targetElementId]);
+      $(`#${targetElementId} > .speaker-frame`).not('.disable').show();
+      this.speakerFrameTimers[targetElementId] = setTimeout(() => {
+        $(`#${targetElementId} > .speaker-frame`).hide();
+        delete this.speakerFrameTimers[targetElementId];
+      }, 200);
+    }
   }
   #debugLog(type = "debug", object = null) {
     console.log(`${type}:`, object);
