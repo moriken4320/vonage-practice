@@ -3,7 +3,6 @@ init:
 	docker-compose up -d --build
 	cp .env.example .env
 	@make reset
-	@make migrate
 	@make yarn
 
 .PHONY: up
@@ -21,7 +20,6 @@ down:
 .PHONY: ps
 ps:
 	docker ps
-
 
 .PHONY: rails
 rails:
@@ -43,6 +41,10 @@ rollback:
 .PHONY: reset
 reset:
 	docker-compose exec web rails db:reset
+
+.PHONY: seed
+seed:
+	docker-compose exec web rails db:seed
 
 .PHONY: c
 c:
