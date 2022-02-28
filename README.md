@@ -1,24 +1,36 @@
-# README
+## 環境構築手順
+1. 以下のコマンドを順に実行
+```
+$ git clone git@github.com:moriken4320/nexpro-vonage-sample.git
+$ cd nexpro-vonage-sample
+$ make init
+```
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+2. envファイルを編集
+```
+API_KEY=[vonageのapi_key]
+SECRET_KEY=[vonageのsecret_key]
+```
+↑各値は[vonageのコンソール画面](https://tokbox.com/account)で確認できる。
+※環境変数を編集しても反映されない場合は、dockerコンテナをリスタートしてください。
 
-Things you may want to cover:
+3. `localhost:3000` でアクセスし、表示確認。
 
-* Ruby version
+## アドミン・ユーザー情報
+admin
+```
+email:
+admin@example.com
 
-* System dependencies
+password:
+123456
+```
 
-* Configuration
+user
+```
+email:
+user@example.com
 
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+password:
+123456
+```
