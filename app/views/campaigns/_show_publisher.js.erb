@@ -52,6 +52,7 @@ const webrtc = new Vue({
             '<%= @campaign.session_id %>',
             '',
             false,
+            `${location.protocol}//${location.host}<%= url_for("/images/webinar_video_off.svg") %>`,
             {
                 disConnectedFunction: (event) => {
                     if (event.reason === 'forceDisconnected') {

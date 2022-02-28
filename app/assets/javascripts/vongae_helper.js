@@ -1,5 +1,5 @@
 class VonageHelper {
-  constructor(apiKey, sessionId, token, isOnlySubscribe, events = {}) {
+  constructor(apiKey, sessionId, token, isOnlySubscribe, videoOffImage = null, events = {}) {
     this.apiKey = apiKey;
     this.sessionId = sessionId;
     this.token = token;
@@ -12,7 +12,7 @@ class VonageHelper {
     $.extend(this.events, events);
     this.videoTagId = "videos";
     this.audioOffImage = null;
-    this.videoOffImage = null;
+    this.videoOffImage = videoOffImage;
     this.userName = null;
     this.existedModeratorCount = 0;
 
@@ -415,7 +415,11 @@ class VonageHelper {
     if (to) option.to = to;
     this.sessionObj.signal(option, (error) => {
       if (error) {
-        this.#errorLog("signal error", error);
+        if (error.name === 'OT_NOT_FOUND') {
+          this.#warnLog("signal connection not found", error);
+        } else {
+          this.#errorLog("signal error", error);
+        }
       } else {
         this.#debugLog("signal sent", { type: type, data: data });
       }
@@ -1026,6 +1030,9 @@ class VonageHelper {
 
   #debugLog(type = "debug", object = null) {
     console.log(`${type}:`, object);
+  }
+  #warnLog(type = "warn", object = null) {
+    console.warn(`${type}:`, object);
   }
   #errorLog(type = "Error", object = null) {
     console.error(`${type}:`, object);
