@@ -1,5 +1,5 @@
 class VonageHelper {
-  constructor(apiKey, sessionId, token, isOnlySubscribe, videoOffImage = null, events = {}) {
+  constructor(apiKey, sessionId, token, isOnlySubscribe, audioOffImage = null, videoOffImage = null, events = {}) {
     this.apiKey = apiKey;
     this.sessionId = sessionId;
     this.token = token;
@@ -11,7 +11,7 @@ class VonageHelper {
     };
     $.extend(this.events, events);
     this.videoTagId = "videos";
-    this.audioOffImage = null;
+    this.audioOffImage = audioOffImage;
     this.videoOffImage = videoOffImage;
     this.userName = null;
     this.existedModeratorCount = 0;
@@ -329,6 +329,12 @@ class VonageHelper {
           "streamPropertyChanged",
           function (event) {
             this.#debugLog("session streamPropertyChanged:", event);
+
+            const isMyself = event.stream.connection.id === this.sessionObj.connection.id;
+            if (event.changedProperty === "hasAudio" && !isMyself) {
+              const targetElementId = this.sessionObj.getSubscribersForStream(event.stream)[0].id;
+              this.#changeDisplayAudioOffImage(targetElementId, event.newValue);
+            }
           },
           this
         );
@@ -449,7 +455,7 @@ class VonageHelper {
             this.publisherObj = null;
           } else {
             this.#debugLog("initPublisher success:");
-            // this.createRemoteAudioOffIcon();
+            this.#createAudioOffImage(this.publisherObj.id, this.enableAudio);
           }
           resolve();
         }
@@ -654,6 +660,8 @@ class VonageHelper {
           "videoElementCreated",
           (event) => {
             this.#debugLog("subscribe videoElementCreated:", event);
+
+            this.#createAudioOffImage(event.target.id, event.target.stream.hasAudio);
           },
           this
         )
@@ -801,11 +809,7 @@ class VonageHelper {
     this.enableAudio = enabled;
     this.publisherObj.publishAudio(this.enableAudio);
     this.#debugLog("setAudioEnabled:", this.enableAudio);
-    // if(this.enableAudio) {
-    //     $("#audio-off-icon").hide();
-    // } else {
-    //     $("#audio-off-icon").show();
-    // }
+    this.#changeDisplayAudioOffImage(this.publisherObj.id, this.enableAudio);
   }
 
   /**
@@ -1028,6 +1032,29 @@ class VonageHelper {
     };
   }
 
+  /**
+   * マイクON/OFF通知イメージの作成
+   * @param {string} targetElementId
+   * @param {boolean} hasAudio
+   */
+  #createAudioOffImage(targetElementId, hasAudio) {
+    const iconElement = $("<img>").attr({
+      "src": this.audioOffImage,
+    })
+    .addClass('audio-off');
+
+    $(`#${targetElementId}`).append(iconElement);
+
+    this.#changeDisplayAudioOffImage(targetElementId, hasAudio);
+  }
+  /**
+   * マイクON/OFF通知イメージの表示切り替え
+   * @param {string} targetElementId
+   * @param {boolean} hasAudio
+   */
+  #changeDisplayAudioOffImage(targetElementId, hasAudio) {
+    hasAudio ? $(`#${targetElementId} > .audio-off`).hide() : $(`#${targetElementId} > .audio-off`).show();
+  }
   #debugLog(type = "debug", object = null) {
     console.log(`${type}:`, object);
   }

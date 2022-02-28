@@ -93,6 +93,7 @@ const webrtc = new Vue({
             '<%= @campaign.session_id %>',
             '',
             false,
+            '<%= url_for("/images/webinar_audio_off.svg") %>',
             `${location.protocol}//${location.host}<%= url_for("/images/webinar_video_off.svg") %>`,
             {
                 disConnectedFunction: () => {
