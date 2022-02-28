@@ -1,11 +1,7 @@
 class CampaignsController < ApplicationController
-    before_action :authenticate_admin!, except: [:test, :index, :new, :create, :show, :show_publisher, :show_subscriber, :generate_subscriber_token]
+    before_action :authenticate_admin!, except: [:index, :new, :create, :show, :show_publisher, :show_subscriber, :generate_subscriber_token]
     before_action :authenticate_user!, only: [:show_subscriber, :generate_subscriber_token]
-    before_action :get_campaign, except: [:test, :index, :new, :create]
-    def test
-
-    end
-
+    before_action :get_campaign, except: [:index, :new, :create]
 
     def index
         @campaigns = Campaign::all.order(created_at: "DESC")
