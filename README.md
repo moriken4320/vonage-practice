@@ -8,8 +8,9 @@ $ make init
 
 2. envファイルを編集
 ```
-API_KEY=[vonageのapi_key]
-SECRET_KEY=[vonageのsecret_key]
+RAILS_MASTER_KEY=???????
+API_KEY=[vonageのapi_key] ←ここを編集
+SECRET_KEY=[vonageのsecret_key] ←ここを編集
 ```
 ↑各値は[vonageのコンソール画面](https://tokbox.com/account)で確認できる。
 
