@@ -519,6 +519,7 @@ class VonageHelper {
           function (event) {
             this.#debugLog("initPublisher muteForced:", event);
             this.enableAudio = false;
+            this.#changeDisplayAudioOffImage(this.publisherObj.id, this.enableAudio);
           },
           this
         )
