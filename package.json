@@ -23,5 +23,8 @@
     "eslint-plugin-vue": "^7.9.0",
     "prettier": "^2.3.0",
     "vue": "^2.6.11"
+  },
+  "engines" : {
+    "node": "10.24.0"
   }
 }
