@@ -20,6 +20,7 @@ SECRET_KEY=[vonageのsecret_key] ←ここを編集
 
 ## アドミン・ユーザー情報
 admin
+※moderatorとしてセッションに接続するために必要な認証情報
 ```
 email:
 admin@example.com
@@ -29,6 +30,7 @@ password:
 ```
 
 user
+※subscriberとしてセッションに接続するために必要な認証情報
 ```
 email:
 user@example.com
