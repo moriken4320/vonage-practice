@@ -132,6 +132,25 @@ const webrtc = new Vue({
         navigator.mediaDevices.ondevicechange = async (event) => {
             await this.vonageHelper.deviceUpdated();
         }
+
+        // リロード、クローズ時の処理サンプル
+        /*
+        $(window).on("beforeunload", (event) => {
+            // 以下URLのHTTPメソッドはPOSTである必要がある。
+            const url = "任意のURL";
+            const payload = new FormData();
+
+            // CSRF用
+            const param = $('meta[name="csrf-param"]').attr('content');
+            const token = $('meta[name="csrf-token"]').attr('content');
+            payload.append(param, token);
+
+            // 送るパラメータ
+            payload.append("key", "value");
+
+            navigator.sendBeacon(url, payload);
+        });
+        */
     },
     methods: {
         /**
