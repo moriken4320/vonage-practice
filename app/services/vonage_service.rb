@@ -103,7 +103,7 @@ module VonageService
     def find_starting_archive(session_id)
       latest_archive = get_archives(session_id)&.first
 
-      if latest_archive.present? && latest_archive.status == 'paused' || latest_archive.status == 'started'
+      if latest_archive.present? && latest_archive&.status == 'paused' || latest_archive&.status == 'started'
         latest_archive.id
       else
         nil
