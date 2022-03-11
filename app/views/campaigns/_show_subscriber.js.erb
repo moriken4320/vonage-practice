@@ -155,7 +155,7 @@ const webrtc = new Vue({
             setTimeout(() => {
                 this.vonageHelper.token = event.data;
                 this.vonageHelper.setOnlySubscribe(false);
-                this.vonageHelper.enableAudio = false;
+                //this.vonageHelper.enableAudio = false;
                 this.vonageHelper.enableVideo = false;
                 this.vonageHelper.sessionConnect();
             }, 1000);
