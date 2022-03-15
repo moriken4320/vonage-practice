@@ -15,6 +15,7 @@ const webrtc = new Vue({
         isRecorded: false,  // 録画しているかどうか
         archiveLayoutOptionsWhenBase: {  // デフォルトの録画レイアウトオプション
             type: 'bestFit',
+            screenshareType: 'verticalPresentation',
         },
         archiveLayoutOptionsWhenScreenSharing: {  // 画面共有中の録画レイアウトオプション
             type: 'custom',

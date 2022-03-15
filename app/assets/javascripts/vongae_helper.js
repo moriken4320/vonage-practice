@@ -299,7 +299,7 @@ class VonageHelper {
             } else {
               this.subscribeObjs.push(subscribe);
             }
-            if (this.events.changeArchiveLayout)
+            if (this.events.changeArchiveLayout && this.subscribeObjs.length > (this.isOnlySubscribe ? 5 : 4))
               this.events.changeArchiveLayout("streamCreated", event);
           },
           this
@@ -880,7 +880,7 @@ class VonageHelper {
         function (event) {
           this.#debugLog("initPublisher(screen) streamCreated:", event);
           this.isScreenShared = true;
-          if (this.events.changeArchiveLayout)
+          if (this.events.changeArchiveLayout && this.subscribeObjs.length > (this.isOnlySubscribe ? 5 : 4))
             this.events.changeArchiveLayout("streamCreated", event);
         },
         this
